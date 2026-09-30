@@ -3,12 +3,14 @@
 import argparse
 from pathlib import Path
 
-from .analysis import calculate_sales_metrics
+from .analysis import calculate_sales_metrics, prepare_sales_data
 from .csv_reader import read_csv
+from .excel_report import export_excel_report
 from .validation import find_data_issues
 
 
 DEFAULT_INPUT = Path(__file__).resolve().parent.parent / "data" / "sample_sales.csv"
+OUTPUT_DIRECTORY = Path(__file__).resolve().parent.parent / "outputs"
 
 
 def get_input_file():
@@ -46,7 +48,8 @@ def main():
     if issues:
         print("Skipped because the CSV has validation issues.")
     else:
-        metrics = calculate_sales_metrics(rows)
+        sales = prepare_sales_data(rows)
+        metrics = calculate_sales_metrics(sales)
         print(f"Total revenue: {metrics['total_revenue']:.2f}")
 
         print("Revenue by category:")
@@ -56,6 +59,10 @@ def main():
         print("Revenue by month:")
         for month, revenue in metrics["revenue_by_month"].items():
             print(f"- {month}: {revenue:.2f}")
+
+        output_file = OUTPUT_DIRECTORY / f"{input_file.stem}_report.xlsx"
+        export_excel_report(sales, metrics, output_file)
+        print(f"Excel report: {output_file}")
 
     print("\nPreview:")
 

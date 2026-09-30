@@ -1,10 +1,10 @@
-"""Calculate sales metrics from validated CSV rows."""
+"""Prepare sales data and calculate its metrics."""
 
 import pandas as pd
 
 
-def calculate_sales_metrics(rows):
-    """Return total revenue and revenue grouped by category and month."""
+def prepare_sales_data(rows):
+    """Convert validated CSV rows into analysis-ready sales data."""
     sales = pd.DataFrame(rows)
 
     sales["order_date"] = pd.to_datetime(sales["order_date"])
@@ -13,6 +13,11 @@ def calculate_sales_metrics(rows):
     sales["revenue"] = (sales["quantity"] * sales["unit_price"]).round(2)
     sales["month"] = sales["order_date"].dt.strftime("%Y-%m")
 
+    return sales
+
+
+def calculate_sales_metrics(sales):
+    """Return total revenue and revenue grouped by category and month."""
     revenue_by_category = (
         sales.groupby("category")["revenue"].sum().round(2).to_dict()
     )
