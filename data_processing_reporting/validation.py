@@ -63,6 +63,9 @@ def find_data_issues(columns, rows):
     if missing_columns:
         issues.append(f"Missing required columns: {', '.join(missing_columns)}")
 
+    if not rows:
+        issues.append("CSV contains no data rows")
+
     for row_number, row in enumerate(rows, start=2):
         for column in REQUIRED_COLUMNS:
             if column not in columns:

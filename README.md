@@ -8,7 +8,7 @@ People often receive data and need to check it, understand a few key trends, and
 
 ## Current status
 
-The program can read one local CSV file, display a short preview, and validate its required fields. Data analysis will be added in later steps. Other input formats can be considered after the basic CSV workflow is clear and useful.
+The program can read one local CSV file, validate its required fields, and calculate total revenue and revenue grouped by category and month. Other input formats can be considered after the basic CSV workflow is clear and useful.
 
 ## Planned development
 
@@ -35,7 +35,13 @@ outputs/                    Generated reports (kept out of Git)
 
 ## Run
 
-Use Python 3 to read the included sample CSV:
+Install the project dependency:
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+Use Python 3 to analyze the included sample CSV:
 
 ```powershell
 python -m data_processing_reporting
@@ -57,12 +63,23 @@ Number of rows: 5
 Validation:
 Passed: all required fields contain valid values.
 
+Sales analysis:
+Total revenue: 110.49
+Revenue by category:
+- Electronics: 62.49
+- Stationery: 48.00
+Revenue by month:
+- 2026-01: 50.49
+- 2026-02: 60.00
+
 Preview:
 2026-01-05 | Notebook | Stationery | 3 | 4.50
 2026-01-08 | Pen Set | Stationery | 2 | 6.00
 ```
 
-The required columns are `order_date`, `product`, `category`, `quantity`, and `unit_price`. The validation checks for missing columns, blank required values, dates outside the `YYYY-MM-DD` format, quantities that are not positive whole numbers, and prices that are not nonnegative numbers. It does not yet check duplicate rows.
+The required columns are `order_date`, `product`, `category`, `quantity`, and `unit_price`. The validation checks for missing columns, an empty dataset, blank required values, dates outside the `YYYY-MM-DD` format, quantities that are not positive whole numbers, and prices that are not nonnegative numbers. It does not yet check duplicate rows.
+
+Revenue is calculated as `quantity * unit_price`. All rows are assumed to use the same currency because the current CSV format does not include a currency column. Analysis is skipped when validation finds an issue.
 
 The current version loads the whole CSV into memory and expects a readable file with a header row.
 

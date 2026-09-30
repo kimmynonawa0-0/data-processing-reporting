@@ -3,6 +3,7 @@
 import argparse
 from pathlib import Path
 
+from .analysis import calculate_sales_metrics
 from .csv_reader import read_csv
 from .validation import find_data_issues
 
@@ -40,6 +41,21 @@ def main():
             print(f"- {issue}")
     else:
         print("Passed: all required fields contain valid values.")
+
+    print("\nSales analysis:")
+    if issues:
+        print("Skipped because the CSV has validation issues.")
+    else:
+        metrics = calculate_sales_metrics(rows)
+        print(f"Total revenue: {metrics['total_revenue']:.2f}")
+
+        print("Revenue by category:")
+        for category, revenue in metrics["revenue_by_category"].items():
+            print(f"- {category}: {revenue:.2f}")
+
+        print("Revenue by month:")
+        for month, revenue in metrics["revenue_by_month"].items():
+            print(f"- {month}: {revenue:.2f}")
 
     print("\nPreview:")
 
