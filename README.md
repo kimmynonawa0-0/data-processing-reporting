@@ -8,7 +8,7 @@ People often receive data and need to check it, understand a few key trends, and
 
 ## Current status
 
-The program can read one local CSV file and display its columns, row count, and first five records. Data validation and analysis will be added in later steps. Other input formats can be considered after the basic CSV workflow is clear and useful.
+The program can read one local CSV file, display a short preview, and check that required columns and values are present. Data analysis will be added in later steps. Other input formats can be considered after the basic CSV workflow is clear and useful.
 
 ## Planned development
 
@@ -54,12 +54,17 @@ File: data\sample_sales.csv
 Columns: order_date, product, category, quantity, unit_price
 Number of rows: 5
 
+Validation:
+Passed: all required columns and values are present.
+
 Preview:
 2026-01-05 | Notebook | Stationery | 3 | 4.50
 2026-01-08 | Pen Set | Stationery | 2 | 6.00
 ```
 
-The current version loads the whole CSV into memory and expects a readable file with a header row. More detailed validation will be added in the next development step.
+The required columns are `order_date`, `product`, `category`, `quantity`, and `unit_price`. The current validation reports missing columns and blank required values. It does not yet check date formats, numeric values, or duplicate rows.
+
+The current version loads the whole CSV into memory and expects a readable file with a header row.
 
 ## Learning topics
 
