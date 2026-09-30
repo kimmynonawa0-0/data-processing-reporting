@@ -39,7 +39,7 @@ def main():
         for issue in issues:
             print(f"- {issue}")
     else:
-        print("Passed: all required columns and values are present.")
+        print("Passed: all required fields contain valid values.")
 
     print("\nPreview:")
 
