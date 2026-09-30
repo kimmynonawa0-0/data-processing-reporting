@@ -1,8 +1,41 @@
 """Command-line entry point for Data-Processing-Reporting."""
 
+import argparse
+from pathlib import Path
+
+from .csv_reader import read_csv
+
+
+DEFAULT_INPUT = Path(__file__).resolve().parent.parent / "data" / "sample_sales.csv"
+
+
+def get_input_file():
+    """Get the CSV file path provided by the user."""
+    parser = argparse.ArgumentParser(
+        description="Read a CSV file and display its basic information."
+    )
+    parser.add_argument(
+        "input_file",
+        nargs="?",
+        type=Path,
+        default=DEFAULT_INPUT,
+        help="CSV file to read (default: data/sample_sales.csv)",
+    )
+    return parser.parse_args().input_file
+
 
 def main():
-    print("Data-Processing-Reporting is set up. Reading one CSV is the next step.")
+    input_file = get_input_file()
+    columns, rows = read_csv(input_file)
+
+    print(f"File: {input_file}")
+    print(f"Columns: {', '.join(columns)}")
+    print(f"Number of rows: {len(rows)}")
+    print("\nPreview:")
+
+    for row in rows[:5]:
+        values = [row[column] for column in columns]
+        print(" | ".join(values))
 
 
 if __name__ == "__main__":

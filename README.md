@@ -8,7 +8,7 @@ People often receive data and need to check it, understand a few key trends, and
 
 ## Current status
 
-This is the initial project structure. The program does not read or analyze files yet; reading one local CSV will be the next development step. Other input formats can be considered after the basic CSV workflow is clear and useful.
+The program can read one local CSV file and display its columns, row count, and first five records. Data validation and analysis will be added in later steps. Other input formats can be considered after the basic CSV workflow is clear and useful.
 
 ## Planned development
 
@@ -35,11 +35,31 @@ outputs/                    Generated reports (kept out of Git)
 
 ## Run
 
-Use Python 3. The initial entry point is only a placeholder until CSV reading is added:
+Use Python 3 to read the included sample CSV:
 
 ```powershell
 python -m data_processing_reporting
 ```
+
+You can also provide another CSV file:
+
+```powershell
+python -m data_processing_reporting path\to\your_file.csv
+```
+
+Example output:
+
+```text
+File: data\sample_sales.csv
+Columns: order_date, product, category, quantity, unit_price
+Number of rows: 5
+
+Preview:
+2026-01-05 | Notebook | Stationery | 3 | 4.50
+2026-01-08 | Pen Set | Stationery | 2 | 6.00
+```
+
+The current version loads the whole CSV into memory and expects a readable file with a header row. More detailed validation will be added in the next development step.
 
 ## Learning topics
 
