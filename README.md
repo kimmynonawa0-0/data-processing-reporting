@@ -8,7 +8,7 @@ People often receive data and need to check it, understand a few key trends, and
 
 ## Current status
 
-The program can read one local CSV file, validate its required fields, calculate revenue metrics, and export the results to Excel. Other input formats can be considered after the basic CSV workflow is clear and useful.
+The program can read one local CSV file, validate its required fields, calculate revenue metrics, and export the results to Excel and PDF. Other input formats can be considered after the basic CSV workflow is clear and useful.
 
 ## Planned development
 
@@ -72,6 +72,7 @@ Revenue by month:
 - 2026-01: 50.49
 - 2026-02: 60.00
 Excel report: outputs\sample_sales_report.xlsx
+PDF report: outputs\sample_sales_report.pdf
 
 Preview:
 2026-01-05 | Notebook | Stationery | 3 | 4.50
@@ -83,6 +84,8 @@ The required columns are `order_date`, `product`, `category`, `quantity`, and `u
 Revenue is calculated as `quantity * unit_price`. All rows are assumed to use the same currency because the current CSV format does not include a currency column. Analysis is skipped when validation finds an issue.
 
 The generated Excel workbook contains a `Cleaned Data` sheet with converted dates, numbers, revenue, and month values. Its `Summary` sheet contains the overall, category, and monthly revenue totals. Generated workbooks are stored in `outputs/` and are not committed to Git.
+
+The generated one-page PDF contains total revenue, a category revenue chart, a monthly revenue chart, and the single-currency assumption. Generated PDFs are also stored in `outputs/` and kept out of Git.
 
 The current version loads the whole CSV into memory and expects a readable file with a header row.
 

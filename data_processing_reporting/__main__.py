@@ -6,6 +6,7 @@ from pathlib import Path
 from .analysis import calculate_sales_metrics, prepare_sales_data
 from .csv_reader import read_csv
 from .excel_report import export_excel_report
+from .pdf_report import export_pdf_report
 from .validation import find_data_issues
 
 
@@ -60,9 +61,13 @@ def main():
         for month, revenue in metrics["revenue_by_month"].items():
             print(f"- {month}: {revenue:.2f}")
 
-        output_file = OUTPUT_DIRECTORY / f"{input_file.stem}_report.xlsx"
-        export_excel_report(sales, metrics, output_file)
-        print(f"Excel report: {output_file}")
+        excel_output = OUTPUT_DIRECTORY / f"{input_file.stem}_report.xlsx"
+        export_excel_report(sales, metrics, excel_output)
+        print(f"Excel report: {excel_output}")
+
+        pdf_output = OUTPUT_DIRECTORY / f"{input_file.stem}_report.pdf"
+        export_pdf_report(metrics, input_file.name, pdf_output)
+        print(f"PDF report: {pdf_output}")
 
     print("\nPreview:")
 
