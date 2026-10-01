@@ -8,7 +8,7 @@ People often receive data and need to check it, understand a few key trends, and
 
 ## Current status
 
-The program can read one local CSV file, validate its required fields, calculate revenue metrics, and export the results to Excel and PDF. Other input formats can be considered after the basic CSV workflow is clear and useful.
+The program can process one sales CSV or a folder of sales CSV files. It validates each file, calculates revenue metrics, exports Excel and PDF reports, and records the result in a processing log. Other input formats can be considered after the CSV workflow is clear and useful.
 
 ## Planned development
 
@@ -53,9 +53,18 @@ You can also provide another CSV file:
 python -m data_processing_reporting path\to\your_file.csv
 ```
 
+To process every CSV file directly inside a folder:
+
+```powershell
+python -m data_processing_reporting path\to\csv_folder
+```
+
 Example output:
 
 ```text
+CSV files found: 1
+
+Processing: data\sample_sales.csv
 File: data\sample_sales.csv
 Columns: order_date, product, category, quantity, unit_price
 Number of rows: 5
@@ -77,6 +86,8 @@ PDF report: outputs\sample_sales_report.pdf
 Preview:
 2026-01-05 | Notebook | Stationery | 3 | 4.50
 2026-01-08 | Pen Set | Stationery | 2 | 6.00
+
+Processing log: outputs\processing_log.csv
 ```
 
 The required columns are `order_date`, `product`, `category`, `quantity`, and `unit_price`. The validation checks for missing columns, an empty dataset, blank required values, dates outside the `YYYY-MM-DD` format, quantities that are not positive whole numbers, and prices that are not nonnegative numbers. It does not yet check duplicate rows.
@@ -86,6 +97,8 @@ Revenue is calculated as `quantity * unit_price`. All rows are assumed to use th
 The generated Excel workbook contains a `Cleaned Data` sheet with converted dates, numbers, revenue, and month values. Its `Summary` sheet contains the overall, category, and monthly revenue totals. Generated workbooks are stored in `outputs/` and are not committed to Git.
 
 The generated one-page PDF contains total revenue, a category revenue chart, a monthly revenue chart, and the single-currency assumption. Generated PDFs are also stored in `outputs/` and kept out of Git.
+
+Every attempted file adds one row to `outputs/processing_log.csv`. The log records the UTC processing time, source file, status, row count, validation or processing issues, and generated report paths. A failed file does not stop the remaining files in the folder. Folder processing is currently nonrecursive.
 
 The current version loads the whole CSV into memory and expects a readable file with a header row.
 
