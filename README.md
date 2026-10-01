@@ -8,7 +8,7 @@ People often receive data and need to check it, understand a few key trends, and
 
 ## Current status
 
-The program can process one sales CSV or a folder of sales CSV files. It validates each file, calculates revenue metrics, exports Excel and PDF reports, and records the result in a processing log. Other input formats can be considered after the CSV workflow is clear and useful.
+The program can process one sales CSV or a folder of sales CSV files. It validates each file, calculates revenue metrics, exports Excel and PDF reports, and records the result in a processing log. Automated tests cover the validation rules and revenue calculations. Other input formats can be considered after the CSV workflow is clear and useful.
 
 ## Planned development
 
@@ -99,6 +99,20 @@ The generated Excel workbook contains a `Cleaned Data` sheet with converted date
 The generated one-page PDF contains total revenue, a category revenue chart, a monthly revenue chart, and the single-currency assumption. Generated PDFs are also stored in `outputs/` and kept out of Git.
 
 Every attempted file adds one row to `outputs/processing_log.csv`. The log records the UTC processing time, source file, status, row count, validation or processing issues, and generated report paths. A failed file does not stop the remaining files in the folder. Folder processing is currently nonrecursive.
+
+## Tests
+
+Install the runtime and development dependencies:
+
+```powershell
+python -m pip install -r requirements-dev.txt
+```
+
+Run the validation and analysis tests:
+
+```powershell
+python -m pytest
+```
 
 The current version loads the whole CSV into memory and expects a readable file with a header row.
 
