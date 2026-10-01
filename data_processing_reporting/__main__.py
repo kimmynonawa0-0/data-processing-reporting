@@ -4,12 +4,9 @@ import argparse
 from csv import Error as CsvError
 from pathlib import Path
 
-from .analysis import calculate_sales_metrics, prepare_sales_data
 from .csv_reader import read_csv
-from .excel_report import export_excel_report
-from .pdf_report import export_pdf_report
+from .pipeline import process_sales_data
 from .processing_log import append_processing_result
-from .validation import find_data_issues
 
 
 DEFAULT_INPUT = Path(__file__).resolve().parent.parent / "data" / "sample_sales.csv"
@@ -50,7 +47,8 @@ def find_csv_files(input_path):
 def process_csv(input_file):
     """Validate, analyze, and export reports for one CSV file."""
     columns, rows = read_csv(input_file)
-    issues = find_data_issues(columns, rows)
+    result = process_sales_data(columns, rows, input_file.name, OUTPUT_DIRECTORY)
+    issues = result["issues"]
 
     print(f"File: {input_file}")
     print(f"Columns: {', '.join(columns)}")
@@ -66,12 +64,8 @@ def process_csv(input_file):
     print("\nSales analysis:")
     if issues:
         print("Skipped because the CSV has validation issues.")
-        excel_output = ""
-        pdf_output = ""
-        status = "validation_failed"
     else:
-        sales = prepare_sales_data(rows)
-        metrics = calculate_sales_metrics(sales)
+        metrics = result["metrics"]
         print(f"Total revenue: {metrics['total_revenue']:.2f}")
 
         print("Revenue by category:")
@@ -82,14 +76,8 @@ def process_csv(input_file):
         for month, revenue in metrics["revenue_by_month"].items():
             print(f"- {month}: {revenue:.2f}")
 
-        excel_output = OUTPUT_DIRECTORY / f"{input_file.stem}_report.xlsx"
-        export_excel_report(sales, metrics, excel_output)
-        print(f"Excel report: {excel_output}")
-
-        pdf_output = OUTPUT_DIRECTORY / f"{input_file.stem}_report.pdf"
-        export_pdf_report(metrics, input_file.name, pdf_output)
-        print(f"PDF report: {pdf_output}")
-        status = "success"
+        print(f"Excel report: {result['excel_report']}")
+        print(f"PDF report: {result['pdf_report']}")
 
     print("\nPreview:")
 
@@ -99,11 +87,11 @@ def process_csv(input_file):
 
     return {
         "input_file": str(input_file.resolve()),
-        "status": status,
+        "status": result["status"],
         "row_count": len(rows),
         "issues": "; ".join(issues),
-        "excel_report": str(excel_output),
-        "pdf_report": str(pdf_output),
+        "excel_report": str(result["excel_report"]),
+        "pdf_report": str(result["pdf_report"]),
     }
 
 
