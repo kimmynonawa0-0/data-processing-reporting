@@ -8,7 +8,7 @@ People often receive data and need to check it, understand a few key trends, and
 
 ## Current status
 
-The program can process one sales CSV or a folder of sales CSV files. It validates each file, calculates revenue metrics, exports Excel and PDF reports, and records the result in a processing log. Automated tests cover the validation rules and revenue calculations. Other input formats can be considered after the CSV workflow is clear and useful.
+The program can process sales CSV files through a command-line workflow or a local upload screen. It validates each file, calculates revenue metrics, and exports Excel and PDF reports. The command-line workflow also supports folders and records each result in a processing log. Automated tests cover the main validation and calculation rules.
 
 ## Planned development
 
@@ -31,6 +31,8 @@ The first version will run locally and use sample sales data. It will not need a
 data_processing_reporting/  Python application
 data/                       Small sample input data
 outputs/                    Generated reports (kept out of Git)
+app.py                      Local file-upload interface
+tests/                      Automated tests
 ```
 
 ## Run
@@ -99,6 +101,16 @@ The generated Excel workbook contains a `Cleaned Data` sheet with converted date
 The generated one-page PDF contains total revenue, a category revenue chart, a monthly revenue chart, and the single-currency assumption. Generated PDFs are also stored in `outputs/` and kept out of Git.
 
 Every attempted file adds one row to `outputs/processing_log.csv`. The log records the UTC processing time, source file, status, row count, validation or processing issues, and generated report paths. A failed file does not stop the remaining files in the folder. Folder processing is currently nonrecursive.
+
+## Upload interface
+
+Start the local Streamlit interface:
+
+```powershell
+python -m streamlit run app.py
+```
+
+Upload one CSV to view its validation result, total revenue, grouped charts, cleaned data, and report download buttons. Reports are generated locally in `outputs/`. The upload interface does not currently process folders or add entries to the command-line processing log.
 
 ## Tests
 
