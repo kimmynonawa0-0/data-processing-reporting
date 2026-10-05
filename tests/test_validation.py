@@ -46,3 +46,12 @@ def test_empty_data_is_reported():
     issues = find_data_issues(REQUIRED_COLUMNS, [])
 
     assert issues == ["CSV contains no data rows"]
+
+
+def test_duplicate_row_is_reported():
+    first_row = VALID_ROW.copy()
+    duplicate_row = VALID_ROW.copy()
+
+    issues = find_data_issues(REQUIRED_COLUMNS, [first_row, duplicate_row])
+
+    assert issues == ["Row 3: duplicate of row 2"]

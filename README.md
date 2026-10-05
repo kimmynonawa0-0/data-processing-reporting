@@ -92,7 +92,7 @@ Preview:
 Processing log: outputs\processing_log.csv
 ```
 
-The required columns are `order_date`, `product`, `category`, `quantity`, and `unit_price`. The validation checks for missing columns, an empty dataset, blank required values, dates outside the `YYYY-MM-DD` format, quantities that are not positive whole numbers, and prices that are not nonnegative numbers. It does not yet check duplicate rows.
+The required columns are `order_date`, `product`, `category`, `quantity`, and `unit_price`. The validation checks for missing columns, an empty dataset, blank required values, exact duplicate rows, dates outside the `YYYY-MM-DD` format, quantities that are not positive whole numbers, and prices that are not nonnegative numbers.
 
 Revenue is calculated as `quantity * unit_price`. All rows are assumed to use the same currency because the current CSV format does not include a currency column. Analysis is skipped when validation finds an issue.
 

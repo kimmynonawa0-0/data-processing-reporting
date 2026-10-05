@@ -53,7 +53,7 @@ def check_unit_price(value, row_number):
 
 
 def find_data_issues(columns, rows):
-    """Return missing fields, blank values, and invalid value formats."""
+    """Return missing fields, invalid values, and duplicate rows."""
     issues = []
 
     missing_columns = [
@@ -88,5 +88,25 @@ def find_data_issues(columns, rows):
 
             if issue:
                 issues.append(issue)
+
+    if not missing_columns:
+        seen_rows = {}
+
+        for row_number, row in enumerate(rows, start=2):
+            row_values = tuple(
+                (row.get(column) or "").strip()
+                for column in REQUIRED_COLUMNS
+            )
+
+            if "" in row_values:
+                continue
+
+            first_row_number = seen_rows.get(row_values)
+            if first_row_number:
+                issues.append(
+                    f"Row {row_number}: duplicate of row {first_row_number}"
+                )
+            else:
+                seen_rows[row_values] = row_number
 
     return issues
