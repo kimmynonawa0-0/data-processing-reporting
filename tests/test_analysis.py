@@ -84,3 +84,30 @@ def test_calculate_sales_metrics_returns_expected_totals():
     assert metrics["revenue_by_month"] == pytest.approx(
         {"2026-01": 50.49, "2026-02": 60.00}
     )
+
+
+def test_categories_are_ranked_by_revenue():
+    rows = [
+        {
+            "order_date": "2026-01-05",
+            "product": "Pen",
+            "category": "Accessories",
+            "quantity": "1",
+            "unit_price": "5.00",
+        },
+        {
+            "order_date": "2026-01-06",
+            "product": "Laptop",
+            "category": "Technology",
+            "quantity": "1",
+            "unit_price": "50.00",
+        },
+    ]
+
+    sales = prepare_sales_data(rows)
+    metrics = calculate_sales_metrics(sales)
+
+    assert list(metrics["revenue_by_category"]) == [
+        "Technology",
+        "Accessories",
+    ]

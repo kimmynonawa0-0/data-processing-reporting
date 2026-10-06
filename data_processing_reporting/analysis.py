@@ -21,7 +21,11 @@ def prepare_sales_data(rows):
 def calculate_sales_metrics(sales):
     """Return total revenue and revenue grouped by category and month."""
     revenue_by_category = (
-        sales.groupby("category")["revenue"].sum().round(2).to_dict()
+        sales.groupby("category")["revenue"]
+        .sum()
+        .round(2)
+        .sort_values(ascending=False, kind="stable")
+        .to_dict()
     )
     revenue_by_month = (
         sales.groupby("month")["revenue"].sum().round(2).to_dict()
