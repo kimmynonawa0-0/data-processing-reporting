@@ -37,4 +37,8 @@ def export_excel_report(sales, metrics, output_file: Path):
         sales.to_excel(writer, sheet_name="Cleaned Data", index=False)
         summary.to_excel(writer, sheet_name="Summary", index=False)
 
+        for worksheet in writer.sheets.values():
+            worksheet.freeze_panes = "A2"
+            worksheet.auto_filter.ref = worksheet.dimensions
+
     return output_file
