@@ -7,6 +7,8 @@ def prepare_sales_data(rows):
     """Convert validated CSV rows into analysis-ready sales data."""
     sales = pd.DataFrame(rows)
 
+    sales["product"] = sales["product"].str.strip()
+    sales["category"] = sales["category"].str.strip()
     sales["order_date"] = pd.to_datetime(sales["order_date"])
     sales["quantity"] = pd.to_numeric(sales["quantity"])
     sales["unit_price"] = pd.to_numeric(sales["unit_price"])

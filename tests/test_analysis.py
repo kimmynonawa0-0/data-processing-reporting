@@ -62,6 +62,17 @@ def test_prepare_sales_data_adds_revenue_and_month():
     ]
 
 
+def test_prepare_sales_data_removes_outer_text_spaces():
+    row = SAMPLE_ROWS[0].copy()
+    row["product"] = "  Notebook "
+    row["category"] = " Stationery  "
+
+    sales = prepare_sales_data([row])
+
+    assert sales.loc[0, "product"] == "Notebook"
+    assert sales.loc[0, "category"] == "Stationery"
+
+
 def test_calculate_sales_metrics_returns_expected_totals():
     sales = prepare_sales_data(SAMPLE_ROWS)
     metrics = calculate_sales_metrics(sales)
