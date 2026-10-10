@@ -57,6 +57,7 @@ def export_excel_report(sales, metrics, output_file: Path):
 
         cleaned_data = writer.sheets["Cleaned Data"]
         summary_sheet = writer.sheets["Summary"]
+        format_number_column(cleaned_data, "order_date", "yyyy-mm-dd")
         format_number_column(cleaned_data, "unit_price", "0.00")
         format_number_column(cleaned_data, "revenue", "0.00")
         format_number_column(summary_sheet, "revenue", "0.00")

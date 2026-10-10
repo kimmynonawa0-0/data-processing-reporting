@@ -39,6 +39,7 @@ def test_excel_report_usability_settings():
 
         cleaned_data = workbook["Cleaned Data"]
         summary = workbook["Summary"]
+        assert cleaned_data["A2"].number_format == "yyyy-mm-dd"
         assert cleaned_data["E2"].number_format == "0.00"
         assert cleaned_data["F2"].number_format == "0.00"
         assert summary["C2"].number_format == "0.00"
