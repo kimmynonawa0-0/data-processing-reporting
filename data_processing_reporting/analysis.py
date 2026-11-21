@@ -38,6 +38,7 @@ def calculate_sales_metrics(sales):
     return {
         "total_revenue": round(float(sales["revenue"].sum()), 2),
         "total_units": int(sales["quantity"].sum()),
+        "row_count": len(sales),
         "revenue_by_category": revenue_by_category,
         "revenue_by_month": revenue_by_month,
     }

@@ -98,7 +98,7 @@ Revenue is calculated as `quantity * unit_price`. All rows are assumed to use th
 
 The generated Excel workbook contains a `Cleaned Data` sheet with converted dates, numbers, revenue, and month values. Its `Summary` sheet contains the total revenue, total units, and the category and monthly revenue totals. Generated workbooks are stored in `outputs/` and are not committed to Git.
 
-The generated one-page PDF contains total revenue, a category revenue chart, a monthly revenue chart, and the single-currency assumption. Generated PDFs are also stored in `outputs/` and kept out of Git.
+The generated one-page PDF contains total revenue, the row count, a category revenue chart, a monthly revenue chart, and the single-currency assumption. Generated PDFs are also stored in `outputs/` and kept out of Git.
 
 Every attempted file adds one row to `outputs/processing_log.csv`. The log records the UTC processing time, source file, status, row count, validation or processing issues, and generated report paths. A failed file does not stop the remaining files in the folder. Folders are scanned recursively, including nested subfolders.
 

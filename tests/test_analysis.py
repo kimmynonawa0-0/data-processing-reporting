@@ -79,6 +79,7 @@ def test_calculate_sales_metrics_returns_expected_totals():
 
     assert metrics["total_revenue"] == pytest.approx(110.49)
     assert metrics["total_units"] == 13
+    assert metrics["row_count"] == 5
     assert metrics["revenue_by_category"] == pytest.approx(
         {"Electronics": 62.49, "Stationery": 48.00}
     )

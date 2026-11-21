@@ -26,6 +26,7 @@ def test_valid_uploaded_data_generates_reports():
     try:
         assert result["status"] == "success"
         assert result["metrics"]["total_revenue"] == 51.00
+        assert result["metrics"]["row_count"] == 2
         assert result["excel_report"].exists()
         assert result["pdf_report"].exists()
     finally:

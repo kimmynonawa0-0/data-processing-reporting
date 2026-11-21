@@ -29,6 +29,13 @@ def export_pdf_report(metrics, source_name, output_file: Path):
         fontsize=14,
         fontweight="bold",
     )
+    figure.text(
+        0.5,
+        0.86,
+        f"Rows: {metrics['row_count']}",
+        ha="center",
+        fontsize=11,
+    )
 
     category_bars = charts[0].bar(categories, category_revenue, color="#4C78A8")
     charts[0].set_title("Revenue by Category")
