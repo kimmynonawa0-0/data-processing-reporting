@@ -1,14 +1,16 @@
-# Data-Processing-Reporting
+# Data Analytics Automation
 
-A small Python project for turning source data into clear, useful summaries and reports.
+A small Python project that turns source data files into clean, useful summaries, charts, and reports — automatically.
 
 ## Problem
 
-People often receive data and need to check it, understand a few key trends, and share the results. This project will automate those steps, starting with a simple, known CSV format.
+People often receive data files and need to clean them, understand a few key trends, and share the results. This project automates those steps: it reads CSV and Excel files, cleans them, and produces summaries, charts, and reports.
 
 ## Current status
 
 The program can process sales CSV files through a command-line workflow or a local upload screen. It validates each file, calculates revenue and unit metrics, and exports Excel and PDF reports. The command-line workflow supports files and folders, scans folders recursively, allows a custom output directory, and records each result in a processing log. The upload screen writes to the same log. Automated tests cover the reading, validation, analysis, reporting, logging, and command-line behavior.
+
+A generic cleaning mode is being added alongside the sales workflow. It reads CSV and Excel files with any columns, detects the type of each column, removes duplicate rows, fills missing values, and records every change in an audit. Automatic chart generation and an updated upload screen are the next steps.
 
 ## Development steps
 
@@ -22,6 +24,7 @@ The project grew one understandable feature at a time:
 6. Create a short PDF report from the same analysis.
 7. Automate processing multiple CSV files and record what happened.
 8. Optionally add a simple file-upload screen after the analysis pipeline works.
+9. Add a generic cleaning mode that profiles and cleans any CSV or Excel file and audits every change.
 
 The first version will run locally and use sample sales data. It will not need a database or cloud service.
 
