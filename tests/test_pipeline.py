@@ -48,3 +48,34 @@ def test_invalid_uploaded_data_does_not_generate_reports():
     assert result["metrics"] is None
     assert not (REPORT_DIRECTORY / "invalid_report.xlsx").exists()
     assert not (REPORT_DIRECTORY / "invalid_report.pdf").exists()
+
+
+def test_extra_columns_are_kept_in_cleaned_data():
+    csv_bytes = (
+        b"order_date,product,category,quantity,unit_price,currency\n"
+        b"2026-01-05,Notebook,Stationery,3,4.50,EUR\n"
+    )
+    columns, rows = read_csv_bytes(csv_bytes)
+
+    result = process_sales_data(
+        columns,
+        rows,
+        "extra.csv",
+        REPORT_DIRECTORY,
+    )
+
+    try:
+        assert result["status"] == "success"
+        assert list(result["sales"].columns) == [
+            "order_date",
+            "product",
+            "category",
+            "quantity",
+            "unit_price",
+            "currency",
+            "revenue",
+            "month",
+        ]
+    finally:
+        result["excel_report"].unlink(missing_ok=True)
+        result["pdf_report"].unlink(missing_ok=True)
