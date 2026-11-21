@@ -8,9 +8,11 @@ import streamlit as st
 
 from data_processing_reporting.csv_reader import read_csv_bytes
 from data_processing_reporting.pipeline import process_sales_data
+from data_processing_reporting.processing_log import append_upload_result
 
 
 OUTPUT_DIRECTORY = Path(__file__).resolve().parent / "outputs"
+PROCESSING_LOG = OUTPUT_DIRECTORY / "processing_log.csv"
 
 
 def show_downloads(result):
@@ -88,9 +90,13 @@ def main():
         st.error("The file has validation issues. Reports were not generated.")
         for issue in result["issues"]:
             st.write(f"- {issue}")
+        append_upload_result(
+            PROCESSING_LOG, uploaded_file.name, len(rows), result
+        )
         return
 
     show_analysis(result)
+    append_upload_result(PROCESSING_LOG, uploaded_file.name, len(rows), result)
 
 
 if __name__ == "__main__":

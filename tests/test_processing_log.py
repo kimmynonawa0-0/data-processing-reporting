@@ -5,6 +5,7 @@ import csv
 from data_processing_reporting.processing_log import (
     LOG_COLUMNS,
     append_processing_result,
+    append_upload_result,
 )
 
 
@@ -54,3 +55,26 @@ def test_log_rows_carry_utc_timestamps(tmp_path):
 
     assert "T" in row["processed_at_utc"]
     assert row["processed_at_utc"].endswith("+00:00")
+
+
+def test_upload_result_rows_match_the_cli_log_shape(tmp_path):
+    log_file = tmp_path / "processing_log.csv"
+    result = {
+        "status": "validation_failed",
+        "issues": ["Row 2: blank value in 'product'"],
+        "sales": None,
+        "excel_report": "",
+        "pdf_report": "",
+    }
+
+    append_upload_result(log_file, "upload.csv", 3, result)
+
+    with log_file.open(encoding="utf-8", newline="") as csv_file:
+        row = next(csv.DictReader(csv_file))
+
+    assert row["input_file"] == "upload.csv"
+    assert row["status"] == "validation_failed"
+    assert row["row_count"] == "3"
+    assert row["issues"] == "Row 2: blank value in 'product'"
+    assert row["excel_report"] == ""
+    assert row["pdf_report"] == ""

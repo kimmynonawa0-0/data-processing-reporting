@@ -31,3 +31,18 @@ def append_processing_result(log_file: Path, result):
         if needs_header:
             writer.writeheader()
         writer.writerow(log_row)
+
+
+def append_upload_result(log_file: Path, source_name, row_count, result):
+    """Append the result of one Streamlit upload to the CSV log."""
+    append_processing_result(
+        log_file,
+        {
+            "input_file": source_name,
+            "status": result["status"],
+            "row_count": row_count,
+            "issues": "; ".join(result["issues"]),
+            "excel_report": str(result["excel_report"]),
+            "pdf_report": str(result["pdf_report"]),
+        },
+    )

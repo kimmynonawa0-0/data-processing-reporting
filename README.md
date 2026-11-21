@@ -110,7 +110,7 @@ Start the local Streamlit interface:
 python -m streamlit run app.py
 ```
 
-Upload one CSV to view its validation result, total revenue, grouped charts, cleaned data, and report download buttons. Reports are generated locally in `outputs/`. The upload interface does not currently process folders or add entries to the command-line processing log.
+Upload one CSV to view its validation result, total revenue, grouped charts, cleaned data, and report download buttons. Reports are generated locally in `outputs/`. The upload interface does not currently process folders. Every upload, valid or not, adds one row to the same processing log used by the command line.
 
 ## Tests
 
