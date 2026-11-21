@@ -8,11 +8,11 @@ People often receive data and need to check it, understand a few key trends, and
 
 ## Current status
 
-The program can process sales CSV files through a command-line workflow or a local upload screen. It validates each file, calculates revenue metrics, and exports Excel and PDF reports. The command-line workflow also supports folders and records each result in a processing log. Automated tests cover the main validation and calculation rules.
+The program can process sales CSV files through a command-line workflow or a local upload screen. It validates each file, calculates revenue and unit metrics, and exports Excel and PDF reports. The command-line workflow supports files and folders, scans folders recursively, allows a custom output directory, and records each result in a processing log. The upload screen writes to the same log. Automated tests cover the reading, validation, analysis, reporting, logging, and command-line behavior.
 
-## Planned development
+## Development steps
 
-Each step will add one understandable feature:
+The project grew one understandable feature at a time:
 
 1. Create the project structure and sample sales data.
 2. Read one CSV file and show a basic summary.
@@ -108,7 +108,7 @@ The generated Excel workbook contains a `Cleaned Data` sheet with converted date
 
 The generated one-page PDF contains total revenue, the row count, a category revenue chart, a monthly revenue chart, and the single-currency assumption. Generated PDFs are also stored in `outputs/` and kept out of Git.
 
-Every attempted file adds one row to `outputs/processing_log.csv`. The log records the UTC processing time, source file, status, row count, validation or processing issues, and generated report paths. A failed file does not stop the remaining files in the folder. Folders are scanned recursively, including nested subfolders.
+Every attempted file adds one row to `outputs/processing_log.csv`. The log records the UTC processing time, source file, status, row count, validation or processing issues, and generated report paths. A failed file does not stop the remaining files in the folder. Folders are scanned recursively, including nested subfolders. After a run, the command line prints a short summary of how many files succeeded and failed.
 
 ## Upload interface
 
@@ -118,7 +118,7 @@ Start the local Streamlit interface:
 python -m streamlit run app.py
 ```
 
-Upload one CSV to view its validation result, total revenue, grouped charts, cleaned data, and report download buttons. Reports are generated locally in `outputs/`. The upload interface does not currently process folders. Every upload, valid or not, adds one row to the same processing log used by the command line.
+Upload one CSV to view its validation result, total revenue, total units, grouped charts, cleaned data, and report download buttons. Reports are generated locally in `outputs/`. The upload interface does not currently process folders. Every upload, valid or not, adds one row to the same processing log used by the command line.
 
 ## Tests
 
@@ -128,7 +128,7 @@ Install the runtime and development dependencies:
 python -m pip install -r requirements-dev.txt
 ```
 
-Run the validation and analysis tests:
+Run the automated tests:
 
 ```powershell
 python -m pytest
