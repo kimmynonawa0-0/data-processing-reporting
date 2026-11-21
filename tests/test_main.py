@@ -103,3 +103,26 @@ def test_main_reports_missing_input(tmp_path, capsys, monkeypatch):
 
     assert exit_code == 1
     assert "No CSV files found" in capsys.readouterr().out
+
+
+def test_find_csv_files_accepts_one_csv_file(tmp_path):
+    csv_file = write_csv(tmp_path, "one.csv", VALID_ROWS)
+
+    assert cli.find_csv_files(csv_file) == [csv_file]
+
+
+def test_find_csv_files_scans_nested_folders(tmp_path):
+    outer = tmp_path / "data"
+    inner = outer / "2026"
+    inner.mkdir(parents=True)
+    first = write_csv(outer, "a.csv", VALID_ROWS)
+    second = write_csv(inner, "b.csv", VALID_ROWS)
+    (inner / "notes.txt").write_text("not a CSV", encoding="utf-8")
+
+    files = cli.find_csv_files(outer)
+
+    assert files == sorted([first, second])
+
+
+def test_find_csv_files_returns_nothing_for_unknown_path(tmp_path):
+    assert cli.find_csv_files(tmp_path / "missing") == []

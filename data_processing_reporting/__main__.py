@@ -30,14 +30,14 @@ def get_input_path():
 
 
 def find_csv_files(input_path):
-    """Return one CSV file or the CSV files directly inside a folder."""
+    """Return one CSV file or the CSV files inside a folder tree."""
     if input_path.is_file() and input_path.suffix.lower() == ".csv":
         return [input_path]
 
     if input_path.is_dir():
         return sorted(
             file
-            for file in input_path.iterdir()
+            for file in input_path.rglob("*")
             if file.is_file() and file.suffix.lower() == ".csv"
         )
 

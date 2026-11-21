@@ -55,7 +55,7 @@ You can also provide another CSV file:
 python -m data_processing_reporting path\to\your_file.csv
 ```
 
-To process every CSV file directly inside a folder:
+To process every CSV file inside a folder, including its subfolders:
 
 ```powershell
 python -m data_processing_reporting path\to\csv_folder
@@ -100,7 +100,7 @@ The generated Excel workbook contains a `Cleaned Data` sheet with converted date
 
 The generated one-page PDF contains total revenue, a category revenue chart, a monthly revenue chart, and the single-currency assumption. Generated PDFs are also stored in `outputs/` and kept out of Git.
 
-Every attempted file adds one row to `outputs/processing_log.csv`. The log records the UTC processing time, source file, status, row count, validation or processing issues, and generated report paths. A failed file does not stop the remaining files in the folder. Folder processing is currently nonrecursive.
+Every attempted file adds one row to `outputs/processing_log.csv`. The log records the UTC processing time, source file, status, row count, validation or processing issues, and generated report paths. A failed file does not stop the remaining files in the folder. Folders are scanned recursively, including nested subfolders.
 
 ## Upload interface
 
