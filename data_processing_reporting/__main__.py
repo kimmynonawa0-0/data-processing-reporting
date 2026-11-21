@@ -11,11 +11,11 @@ from .processing_log import append_processing_result
 
 DEFAULT_INPUT = Path(__file__).resolve().parent.parent / "data" / "sample_sales.csv"
 OUTPUT_DIRECTORY = Path(__file__).resolve().parent.parent / "outputs"
-PROCESSING_LOG = OUTPUT_DIRECTORY / "processing_log.csv"
+PROCESSING_LOG_NAME = "processing_log.csv"
 
 
-def get_input_path():
-    """Get the CSV file or folder path provided by the user."""
+def get_arguments():
+    """Parse the input path and output directory provided by the user."""
     parser = argparse.ArgumentParser(
         description="Validate and analyze one CSV file or a folder of CSV files."
     )
@@ -26,7 +26,14 @@ def get_input_path():
         default=DEFAULT_INPUT,
         help="CSV file or folder to process (default: data/sample_sales.csv)",
     )
-    return parser.parse_args().input_path
+    parser.add_argument(
+        "--output-directory",
+        type=Path,
+        default=OUTPUT_DIRECTORY,
+        help="Folder for the generated reports and processing log "
+        "(default: outputs)",
+    )
+    return parser.parse_args()
 
 
 def find_csv_files(input_path):
@@ -44,10 +51,12 @@ def find_csv_files(input_path):
     return []
 
 
-def process_csv(input_file):
+def process_csv(input_file, output_directory):
     """Validate, analyze, and export reports for one CSV file."""
     columns, rows = read_csv(input_file)
-    result = process_sales_data(columns, rows, input_file.name, OUTPUT_DIRECTORY)
+    result = process_sales_data(
+        columns, rows, input_file.name, output_directory
+    )
     issues = result["issues"]
 
     print(f"File: {input_file}")
@@ -97,7 +106,10 @@ def process_csv(input_file):
 
 
 def main():
-    input_path = get_input_path()
+    arguments = get_arguments()
+    input_path = arguments.input_path
+    output_directory = arguments.output_directory
+    processing_log = output_directory / PROCESSING_LOG_NAME
     input_files = find_csv_files(input_path)
 
     if not input_files:
@@ -111,7 +123,7 @@ def main():
         print(f"\nProcessing: {input_file}")
 
         try:
-            result = process_csv(input_file)
+            result = process_csv(input_file, output_directory)
         except (OSError, UnicodeError, CsvError) as error:
             print(f"Processing failed: {error}")
             result = {
@@ -123,12 +135,12 @@ def main():
                 "pdf_report": "",
             }
 
-        append_processing_result(PROCESSING_LOG, result)
+        append_processing_result(processing_log, result)
 
         if result["status"] != "success":
             has_failures = True
 
-    print(f"\nProcessing log: {PROCESSING_LOG}")
+    print(f"\nProcessing log: {processing_log}")
     return 1 if has_failures else 0
 
 

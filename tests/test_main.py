@@ -18,12 +18,11 @@ def write_csv(folder, name, text):
     return csv_file
 
 
-def test_process_csv_reports_success(tmp_path, capsys, monkeypatch):
+def test_process_csv_reports_success(tmp_path, capsys):
     outputs = tmp_path / "outputs"
-    monkeypatch.setattr(cli, "OUTPUT_DIRECTORY", outputs)
     input_file = write_csv(tmp_path, "orders.csv", VALID_ROWS)
 
-    result = cli.process_csv(input_file)
+    result = cli.process_csv(input_file, outputs)
     output = capsys.readouterr().out
 
     assert result["status"] == "success"
@@ -33,16 +32,15 @@ def test_process_csv_reports_success(tmp_path, capsys, monkeypatch):
     assert (outputs / "orders_report.pdf").exists()
 
 
-def test_process_csv_reports_validation_failure(tmp_path, monkeypatch):
+def test_process_csv_reports_validation_failure(tmp_path):
     outputs = tmp_path / "outputs"
-    monkeypatch.setattr(cli, "OUTPUT_DIRECTORY", outputs)
     input_file = write_csv(
         tmp_path,
         "bad.csv",
         "order_date,product\n2026-01-05,Notebook\n",
     )
 
-    result = cli.process_csv(input_file)
+    result = cli.process_csv(input_file, outputs)
 
     assert result["status"] == "validation_failed"
     assert not (outputs / "bad_report.xlsx").exists()
@@ -52,13 +50,17 @@ def test_process_csv_reports_validation_failure(tmp_path, monkeypatch):
 def test_main_processes_folder_and_writes_log(tmp_path, monkeypatch):
     outputs = tmp_path / "outputs"
     log_file = outputs / "processing_log.csv"
-    monkeypatch.setattr(cli, "OUTPUT_DIRECTORY", outputs)
-    monkeypatch.setattr(cli, "PROCESSING_LOG", log_file)
     data_folder = tmp_path / "data"
     data_folder.mkdir()
     write_csv(data_folder, "sample.csv", VALID_ROWS)
     monkeypatch.setattr(
-        "sys.argv", ["data_processing_reporting", str(data_folder)]
+        "sys.argv",
+        [
+            "data_processing_reporting",
+            str(data_folder),
+            "--output-directory",
+            str(outputs),
+        ],
     )
 
     exit_code = cli.main()
@@ -73,8 +75,6 @@ def test_main_processes_folder_and_writes_log(tmp_path, monkeypatch):
 def test_main_returns_one_when_a_file_fails(tmp_path, monkeypatch):
     outputs = tmp_path / "outputs"
     log_file = outputs / "processing_log.csv"
-    monkeypatch.setattr(cli, "OUTPUT_DIRECTORY", outputs)
-    monkeypatch.setattr(cli, "PROCESSING_LOG", log_file)
     data_folder = tmp_path / "data"
     data_folder.mkdir()
     write_csv(
@@ -83,7 +83,13 @@ def test_main_returns_one_when_a_file_fails(tmp_path, monkeypatch):
         "order_date,product\n2026-01-05,Notebook\n",
     )
     monkeypatch.setattr(
-        "sys.argv", ["data_processing_reporting", str(data_folder)]
+        "sys.argv",
+        [
+            "data_processing_reporting",
+            str(data_folder),
+            "--output-directory",
+            str(outputs),
+        ],
     )
 
     exit_code = cli.main()
@@ -104,6 +110,23 @@ def test_main_reports_missing_input(tmp_path, capsys, monkeypatch):
 
     assert exit_code == 1
     assert "No CSV files found" in capsys.readouterr().out
+
+
+def test_get_arguments_reads_output_directory(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "data_processing_reporting",
+            str(tmp_path / "data.csv"),
+            "--output-directory",
+            str(tmp_path / "reports"),
+        ],
+    )
+
+    arguments = cli.get_arguments()
+
+    assert arguments.input_path == tmp_path / "data.csv"
+    assert arguments.output_directory == tmp_path / "reports"
 
 
 def test_find_csv_files_accepts_one_csv_file(tmp_path):

@@ -61,6 +61,12 @@ To process every CSV file inside a folder, including its subfolders:
 python -m data_processing_reporting path\to\csv_folder
 ```
 
+To write the reports and processing log into a different folder instead of `outputs`:
+
+```powershell
+python -m data_processing_reporting path\to\csv_folder --output-directory path\to\reports
+```
+
 Example output:
 
 ```text
