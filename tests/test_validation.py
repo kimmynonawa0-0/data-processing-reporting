@@ -48,6 +48,12 @@ def test_empty_data_is_reported():
     assert issues == ["CSV contains no data rows"]
 
 
+def test_csv_without_header_row_is_reported():
+    issues = find_data_issues([], [])
+
+    assert issues == ["CSV has no header row"]
+
+
 def test_duplicate_row_is_reported():
     first_row = VALID_ROW.copy()
     duplicate_row = VALID_ROW.copy()

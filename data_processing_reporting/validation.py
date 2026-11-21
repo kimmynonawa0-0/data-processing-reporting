@@ -56,6 +56,9 @@ def find_data_issues(columns, rows):
     """Return missing fields, invalid values, and duplicate rows."""
     issues = []
 
+    if not columns:
+        return ["CSV has no header row"]
+
     missing_columns = [
         column for column in REQUIRED_COLUMNS if column not in columns
     ]
