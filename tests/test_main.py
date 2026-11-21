@@ -47,7 +47,7 @@ def test_process_csv_reports_validation_failure(tmp_path):
     assert not (outputs / "bad_report.pdf").exists()
 
 
-def test_main_processes_folder_and_writes_log(tmp_path, monkeypatch):
+def test_main_processes_folder_and_writes_log(tmp_path, capsys, monkeypatch):
     outputs = tmp_path / "outputs"
     log_file = outputs / "processing_log.csv"
     data_folder = tmp_path / "data"
@@ -66,13 +66,14 @@ def test_main_processes_folder_and_writes_log(tmp_path, monkeypatch):
     exit_code = cli.main()
 
     assert exit_code == 0
+    assert "Done: 1 succeeded, 0 failed." in capsys.readouterr().out
     with log_file.open(encoding="utf-8", newline="") as csv_file:
         rows = list(csv.DictReader(csv_file))
     assert len(rows) == 1
     assert rows[0]["status"] == "success"
 
 
-def test_main_returns_one_when_a_file_fails(tmp_path, monkeypatch):
+def test_main_returns_one_when_a_file_fails(tmp_path, capsys, monkeypatch):
     outputs = tmp_path / "outputs"
     log_file = outputs / "processing_log.csv"
     data_folder = tmp_path / "data"
@@ -95,6 +96,7 @@ def test_main_returns_one_when_a_file_fails(tmp_path, monkeypatch):
     exit_code = cli.main()
 
     assert exit_code == 1
+    assert "Done: 0 succeeded, 1 failed." in capsys.readouterr().out
     with log_file.open(encoding="utf-8", newline="") as csv_file:
         rows = list(csv.DictReader(csv_file))
     assert rows[0]["status"] == "validation_failed"

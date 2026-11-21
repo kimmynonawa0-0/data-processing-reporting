@@ -82,6 +82,7 @@ Passed: all required fields contain valid values.
 
 Sales analysis:
 Total revenue: 110.49
+Total units: 13
 Revenue by category:
 - Electronics: 62.49
 - Stationery: 48.00
@@ -95,6 +96,7 @@ Preview:
 2026-01-05 | Notebook | Stationery | 3 | 4.50
 2026-01-08 | Pen Set | Stationery | 2 | 6.00
 
+Done: 1 succeeded, 0 failed.
 Processing log: outputs\processing_log.csv
 ```
 

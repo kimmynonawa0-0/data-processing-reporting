@@ -118,6 +118,7 @@ def main():
 
     print(f"CSV files found: {len(input_files)}")
     has_failures = False
+    successful_files = 0
 
     for input_file in input_files:
         print(f"\nProcessing: {input_file}")
@@ -139,8 +140,12 @@ def main():
 
         if result["status"] != "success":
             has_failures = True
+        else:
+            successful_files += 1
 
-    print(f"\nProcessing log: {processing_log}")
+    failed_files = len(input_files) - successful_files
+    print(f"\nDone: {successful_files} succeeded, {failed_files} failed.")
+    print(f"Processing log: {processing_log}")
     return 1 if has_failures else 0
 
 
