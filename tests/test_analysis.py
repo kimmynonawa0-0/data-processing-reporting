@@ -86,6 +86,18 @@ def test_calculate_sales_metrics_returns_expected_totals():
     )
 
 
+def test_months_are_ordered_chronologically():
+    rows = [
+        {**SAMPLE_ROWS[3]},  # 2026-02-02
+        {**SAMPLE_ROWS[0]},  # 2026-01-05
+    ]
+
+    sales = prepare_sales_data(rows)
+    metrics = calculate_sales_metrics(sales)
+
+    assert list(metrics["revenue_by_month"]) == ["2026-01", "2026-02"]
+
+
 def test_categories_are_ranked_by_revenue():
     rows = [
         {

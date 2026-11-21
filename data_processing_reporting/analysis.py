@@ -28,7 +28,11 @@ def calculate_sales_metrics(sales):
         .to_dict()
     )
     revenue_by_month = (
-        sales.groupby("month")["revenue"].sum().round(2).to_dict()
+        sales.groupby("month")["revenue"]
+        .sum()
+        .round(2)
+        .sort_index()
+        .to_dict()
     )
 
     return {
