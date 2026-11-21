@@ -43,6 +43,7 @@ def show_analysis(result):
     metrics = result["metrics"]
     st.success("Validation passed.")
     st.metric("Total revenue", f"{metrics['total_revenue']:.2f}")
+    st.metric("Total units", f"{metrics['total_units']}")
 
     category_chart = pd.Series(
         metrics["revenue_by_category"], name="Revenue"

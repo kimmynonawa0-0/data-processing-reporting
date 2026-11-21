@@ -28,6 +28,7 @@ def test_process_csv_reports_success(tmp_path, capsys, monkeypatch):
 
     assert result["status"] == "success"
     assert "Total revenue: 13.50" in output
+    assert "Total units: 3" in output
     assert (outputs / "orders_report.xlsx").exists()
     assert (outputs / "orders_report.pdf").exists()
 

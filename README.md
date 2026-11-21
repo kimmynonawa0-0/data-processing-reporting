@@ -96,7 +96,7 @@ The required columns are `order_date`, `product`, `category`, `quantity`, and `u
 
 Revenue is calculated as `quantity * unit_price`. All rows are assumed to use the same currency because the current CSV format does not include a currency column. Analysis is skipped when validation finds an issue.
 
-The generated Excel workbook contains a `Cleaned Data` sheet with converted dates, numbers, revenue, and month values. Its `Summary` sheet contains the overall, category, and monthly revenue totals. Generated workbooks are stored in `outputs/` and are not committed to Git.
+The generated Excel workbook contains a `Cleaned Data` sheet with converted dates, numbers, revenue, and month values. Its `Summary` sheet contains the total revenue, total units, and the category and monthly revenue totals. Generated workbooks are stored in `outputs/` and are not committed to Git.
 
 The generated one-page PDF contains total revenue, a category revenue chart, a monthly revenue chart, and the single-currency assumption. Generated PDFs are also stored in `outputs/` and kept out of Git.
 

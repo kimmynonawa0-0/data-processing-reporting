@@ -25,18 +25,23 @@ def create_summary_table(metrics):
         {
             "section": "Overall",
             "label": "Total revenue",
-            "revenue": metrics["total_revenue"],
-        }
+            "value": metrics["total_revenue"],
+        },
+        {
+            "section": "Overall",
+            "label": "Total units",
+            "value": metrics["total_units"],
+        },
     ]
 
     for category, revenue in metrics["revenue_by_category"].items():
         summary_rows.append(
-            {"section": "Category", "label": category, "revenue": revenue}
+            {"section": "Category", "label": category, "value": revenue}
         )
 
     for month, revenue in metrics["revenue_by_month"].items():
         summary_rows.append(
-            {"section": "Month", "label": month, "revenue": revenue}
+            {"section": "Month", "label": month, "value": revenue}
         )
 
     return pd.DataFrame(summary_rows)
@@ -60,6 +65,10 @@ def export_excel_report(sales, metrics, output_file: Path):
         format_number_column(cleaned_data, "order_date", "yyyy-mm-dd")
         format_number_column(cleaned_data, "unit_price", "0.00")
         format_number_column(cleaned_data, "revenue", "0.00")
-        format_number_column(summary_sheet, "revenue", "0.00")
+        format_number_column(summary_sheet, "value", "0.00")
+
+        for row in summary_sheet.iter_rows(min_row=2):
+            if row[1].value == "Total units":
+                row[2].number_format = "0"
 
     return output_file

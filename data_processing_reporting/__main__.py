@@ -67,6 +67,7 @@ def process_csv(input_file):
     else:
         metrics = result["metrics"]
         print(f"Total revenue: {metrics['total_revenue']:.2f}")
+        print(f"Total units: {metrics['total_units']}")
 
         print("Revenue by category:")
         for category, revenue in metrics["revenue_by_category"].items():

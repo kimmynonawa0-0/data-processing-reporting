@@ -42,7 +42,10 @@ def test_excel_report_usability_settings():
         assert cleaned_data["A2"].number_format == "yyyy-mm-dd"
         assert cleaned_data["E2"].number_format == "0.00"
         assert cleaned_data["F2"].number_format == "0.00"
+        assert summary["B2"].value == "Total revenue"
         assert summary["C2"].number_format == "0.00"
+        assert summary["B3"].value == "Total units"
+        assert summary["C3"].number_format == "0"
     finally:
         if workbook:
             workbook.close()
