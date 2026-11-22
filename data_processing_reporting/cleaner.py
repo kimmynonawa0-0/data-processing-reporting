@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from .profiler import infer_column_types
+from .profiler import infer_column_types, profile_data
 
 
 def text_columns(data: pd.DataFrame, column_types):
@@ -144,3 +144,28 @@ def fill_null_values(data: pd.DataFrame, column_types):
             fill_categorical_column(filled, column, fills)
 
     return filled, fills
+
+
+def clean_data(data: pd.DataFrame):
+    """Run the full cleaning workflow and audit every change."""
+    column_types = profile_data(data)["column_types"]
+    rows_before = len(data)
+
+    cleaned, trimmed_columns = trim_text_columns(data)
+    cleaned, duplicates_dropped = deduplicate_rows(cleaned)
+    cleaned, nulls_filled = fill_null_values(cleaned, column_types)
+
+    audit = {
+        "rows_before": rows_before,
+        "rows_after": len(cleaned),
+        "duplicates_dropped": duplicates_dropped,
+        "columns_trimmed": trimmed_columns,
+        "nulls_filled": nulls_filled,
+        "nulls_remaining": {
+            column: int(cleaned[column].isna().sum())
+            for column in cleaned.columns
+            if cleaned[column].isna().any()
+        },
+    }
+
+    return cleaned, audit
