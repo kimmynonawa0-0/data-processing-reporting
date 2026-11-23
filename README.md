@@ -123,6 +123,8 @@ Add `--generic` to clean any CSV or Excel file instead of running the sales work
 python -m data_processing_reporting data\sample_messy.csv --generic
 ```
 
+Run it without a path to clean the included messy sample automatically:
+
 Example output:
 
 ```text

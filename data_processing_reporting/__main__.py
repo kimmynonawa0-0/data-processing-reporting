@@ -12,6 +12,9 @@ from .tabular_reader import SUPPORTED_SUFFIXES, read_tabular
 
 
 DEFAULT_INPUT = Path(__file__).resolve().parent.parent / "data" / "sample_sales.csv"
+DEFAULT_GENERIC_INPUT = (
+    Path(__file__).resolve().parent.parent / "data" / "sample_messy.csv"
+)
 OUTPUT_DIRECTORY = Path(__file__).resolve().parent.parent / "outputs"
 PROCESSING_LOG_NAME = "processing_log.csv"
 
@@ -26,8 +29,9 @@ def get_arguments():
         "input_path",
         nargs="?",
         type=Path,
-        default=DEFAULT_INPUT,
-        help="File or folder to process (default: data/sample_sales.csv)",
+        default=None,
+        help="File or folder to process (default: data/sample_sales.csv, "
+        "or data/sample_messy.csv with --generic)",
     )
     parser.add_argument(
         "--output-directory",
@@ -224,7 +228,14 @@ def run_generic(input_path, output_directory):
 
 def main():
     arguments = get_arguments()
-    input_path = arguments.input_path
+
+    if arguments.input_path is None:
+        input_path = (
+            DEFAULT_GENERIC_INPUT if arguments.generic else DEFAULT_INPUT
+        )
+    else:
+        input_path = arguments.input_path
+
     output_directory = arguments.output_directory
 
     if arguments.generic:
