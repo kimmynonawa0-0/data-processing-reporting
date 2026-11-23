@@ -8,9 +8,11 @@ People often receive data files and need to clean them, understand a few key tre
 
 ## Current status
 
-The program can process sales CSV files through a command-line workflow or a local upload screen. It validates each file, calculates revenue and unit metrics, and exports Excel and PDF reports. The command-line workflow supports files and folders, scans folders recursively, allows a custom output directory, and records each result in a processing log. The upload screen writes to the same log. Automated tests cover the reading, validation, analysis, reporting, logging, and command-line behavior.
+The program has two workflows, both available from the command line and a local upload screen.
 
-A generic cleaning mode is being added alongside the sales workflow. It reads CSV and Excel files with any columns, detects the type of each column, removes duplicate rows, fills missing values, and records every change in an audit. Automatic chart generation and an updated upload screen are the next steps.
+The sales workflow processes sales CSV files. It validates each file, calculates revenue and unit metrics, and exports Excel and PDF reports.
+
+The generic cleaning workflow reads any CSV or Excel file, detects the type of each column, removes duplicate rows, trims text, fills missing values, and generates charts automatically. Every cleaning action is recorded in an audit. Both workflows support files and folders, scan folders recursively, allow a custom output directory, and record each result in a processing log. Automated tests cover the reading, profiling, cleaning, charting, validation, analysis, reporting, logging, and command-line behavior.
 
 ## Development steps
 
@@ -24,7 +26,7 @@ The project grew one understandable feature at a time:
 6. Create a short PDF report from the same analysis.
 7. Automate processing multiple CSV files and record what happened.
 8. Optionally add a simple file-upload screen after the analysis pipeline works.
-9. Add a generic cleaning mode that profiles and cleans any CSV or Excel file and audits every change.
+9. Add a generic cleaning mode that profiles and cleans any CSV or Excel file, audits every change, and generates charts automatically.
 
 The first version will run locally and use sample sales data. It will not need a database or cloud service.
 
@@ -113,6 +115,50 @@ The generated one-page PDF contains total revenue, the row count, a category rev
 
 Every attempted file adds one row to `outputs/processing_log.csv`. The log records the UTC processing time, source file, status, row count, validation or processing issues, and generated report paths. A failed file does not stop the remaining files in the folder. Folders are scanned recursively, including nested subfolders. After a run, the command line prints a short summary of how many files succeeded and failed.
 
+## Generic cleaning mode
+
+Add `--generic` to clean any CSV or Excel file instead of running the sales workflow:
+
+```powershell
+python -m data_processing_reporting data\sample_messy.csv --generic
+```
+
+Example output:
+
+```text
+Files found: 1
+
+Processing: data\sample_messy.csv
+File: data\sample_messy.csv
+Columns: order_date, product, category, quantity, unit_price
+Rows before cleaning: 12
+Rows after cleaning: 10
+Duplicate rows dropped: 2
+Nulls filled:
+- category: 1 filled using mode (Electronics)
+- quantity: 2 filled using median (2.0)
+- unit_price: 3 filled using median (10.0)
+Charts generated: 6
+Cleaned CSV: outputs\sample_messy_cleaned.csv
+Cleaned Excel: outputs\sample_messy_cleaned.xlsx
+PDF report: outputs\sample_messy_report.pdf
+
+Done: 1 succeeded, 0 failed.
+Processing log: outputs\processing_log.csv
+```
+
+The generic workflow profiles each file to detect `numeric`, `datetime`, and `categorical` columns, then:
+
+- removes exact duplicate rows,
+- trims outer spaces from text columns,
+- fills missing values by column type: the median for numeric columns, the most common value for categorical columns, and the nearest date for datetime columns.
+
+Every change is recorded in a cleaning audit, which appears in the command-line output, the Excel `Cleaning Audit` sheet, and the PDF report. Nulls that could not be filled are reported instead of silently dropped.
+
+Charts are chosen by column type: histograms for numeric columns, a monthly line for datetime columns, top-category bars for categorical columns with few unique values, and a correlation heatmap when at least two numeric columns exist. At most six charts are generated to keep reports compact.
+
+The workflow exports three files next to the source: `*_cleaned.csv`, `*_cleaned.xlsx`, and `*_report.pdf`.
+
 ## Upload interface
 
 Start the local Streamlit interface:
@@ -121,7 +167,7 @@ Start the local Streamlit interface:
 python -m streamlit run app.py
 ```
 
-Upload one CSV to view its validation result, total revenue, total units, grouped charts, cleaned data, and report download buttons. Reports are generated locally in `outputs/`. The upload interface does not currently process folders. Every upload, valid or not, adds one row to the same processing log used by the command line.
+Upload one sales CSV in the `Sales Reports` tab to view its validation result, total revenue, total units, grouped charts, cleaned data, and report download buttons. Upload any CSV or Excel file in the `Data Cleaner` tab to view its cleaning audit, generated charts, cleaned data, and download buttons for the cleaned CSV, cleaned Excel, and PDF report. Reports are generated locally in `outputs/`. The upload interface does not currently process folders. Every upload, valid or not, adds one row to the same processing log used by the command line.
 
 ## Tests
 
@@ -137,8 +183,8 @@ Run the automated tests:
 python -m pytest
 ```
 
-The current version loads the whole CSV into memory and expects a readable file with a header row.
+The current version loads each file into memory and expects a readable file with a header row.
 
 ## Learning topics
 
-Python modules and command-line entry points, CSV and file handling, data validation, pandas, summary metrics, Excel and PDF output, logging, and basic testing will be introduced as the project grows.
+Python modules and command-line entry points, CSV and file handling, data validation, pandas, column type inference, data cleaning audits, automatic chart selection, summary metrics, Excel and PDF output, logging, and basic testing will be introduced as the project grows.
