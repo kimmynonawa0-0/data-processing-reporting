@@ -134,7 +134,7 @@ def export_generic_pdf_report(profile, audit, charts, source_name, output_file):
         pdf.savefig(figure)
         plt.close(figure)
 
-        for _, chart in charts:
+        for chart, _ in charts:
             pdf.savefig(chart)
             plt.close(chart)
 
