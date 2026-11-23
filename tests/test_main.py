@@ -152,3 +152,68 @@ def test_find_csv_files_scans_nested_folders(tmp_path):
 
 def test_find_csv_files_returns_nothing_for_unknown_path(tmp_path):
     assert cli.find_csv_files(tmp_path / "missing") == []
+
+
+def test_process_generic_file_cleans_and_charts(tmp_path, capsys):
+    outputs = tmp_path / "outputs"
+    input_file = write_csv(
+        tmp_path,
+        "messy.csv",
+        "order_date,price,product\n"
+        "2026-01-05,4.50,Pen\n"
+        "2026-01-05,4.50,Pen\n"
+        "2026-01-08,,Paper\n",
+    )
+
+    result = cli.process_generic_file(input_file, outputs)
+    output = capsys.readouterr().out
+
+    assert result["status"] == "success"
+    assert "Rows before cleaning: 3" in output
+    assert "Rows after cleaning: 2" in output
+    assert "- price: 1 filled using median (4.5)" in output
+    assert (outputs / "messy_cleaned.csv").exists()
+    assert (outputs / "messy_cleaned.xlsx").exists()
+    assert (outputs / "messy_report.pdf").exists()
+
+
+def test_process_generic_file_reports_empty_files(tmp_path):
+    outputs = tmp_path / "outputs"
+    input_file = write_csv(tmp_path, "empty.csv", "price\n")
+
+    result = cli.process_generic_file(input_file, outputs)
+
+    assert result["status"] == "failed"
+
+
+def test_main_generic_processes_folder_and_writes_log(
+    tmp_path, capsys, monkeypatch
+):
+    outputs = tmp_path / "outputs"
+    log_file = outputs / "processing_log.csv"
+    data_folder = tmp_path / "data"
+    data_folder.mkdir()
+    write_csv(
+        data_folder,
+        "messy.csv",
+        "price,product\n4.50,Pen\n4.50,Pen\n6.00,Paper\n",
+    )
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "data_processing_reporting",
+            str(data_folder),
+            "--generic",
+            "--output-directory",
+            str(outputs),
+        ],
+    )
+
+    exit_code = cli.main()
+
+    assert exit_code == 0
+    assert "Done: 1 succeeded, 0 failed." in capsys.readouterr().out
+    with log_file.open(encoding="utf-8", newline="") as csv_file:
+        rows = list(csv.DictReader(csv_file))
+    assert len(rows) == 1
+    assert rows[0]["status"] == "success"
