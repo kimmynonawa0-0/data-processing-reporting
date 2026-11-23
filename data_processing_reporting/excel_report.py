@@ -1,4 +1,4 @@
-"""Export analyzed sales data to an Excel workbook."""
+"""Export sales and generic cleaning results to Excel workbooks."""
 
 from pathlib import Path
 
@@ -70,5 +70,68 @@ def export_excel_report(sales, metrics, output_file: Path):
         for row in summary_sheet.iter_rows(min_row=2):
             if row[1].value == "Total units":
                 row[2].number_format = "0"
+
+    return output_file
+
+
+def create_audit_table(audit):
+    """Arrange the cleaning audit as rows for an Excel sheet."""
+    rows = [
+        {
+            "section": "Rows",
+            "label": "Before cleaning",
+            "value": audit["rows_before"],
+        },
+        {
+            "section": "Rows",
+            "label": "After cleaning",
+            "value": audit["rows_after"],
+        },
+        {
+            "section": "Rows",
+            "label": "Duplicates dropped",
+            "value": audit["duplicates_dropped"],
+        },
+    ]
+
+    for column in audit["columns_trimmed"]:
+        rows.append({"section": "Text", "label": "Trimmed", "value": column})
+
+    for fill in audit["nulls_filled"]:
+        rows.append(
+            {
+                "section": "Nulls",
+                "label": fill["column"],
+                "value": (
+                    f"{fill['count']} filled using {fill['method']}"
+                    f" ({fill['value']})"
+                ),
+            }
+        )
+
+    for column, count in audit["nulls_remaining"].items():
+        rows.append(
+            {
+                "section": "Nulls",
+                "label": column,
+                "value": f"{count} could not be filled",
+            }
+        )
+
+    return pd.DataFrame(rows)
+
+
+def export_generic_excel_report(cleaned, audit, output_file: Path):
+    """Write cleaned data and the cleaning audit to an Excel workbook."""
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    audit_table = create_audit_table(audit)
+
+    with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
+        cleaned.to_excel(writer, sheet_name="Cleaned Data", index=False)
+        audit_table.to_excel(writer, sheet_name="Cleaning Audit", index=False)
+
+        for worksheet in writer.sheets.values():
+            worksheet.freeze_panes = "A2"
+            worksheet.auto_filter.ref = worksheet.dimensions
 
     return output_file

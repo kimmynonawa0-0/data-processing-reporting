@@ -1,4 +1,4 @@
-"""Export sales metrics as a one-page PDF report."""
+"""Export sales metrics and generic cleaning results as PDF reports."""
 
 from pathlib import Path
 
@@ -7,6 +7,7 @@ import matplotlib
 matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
 
 def export_pdf_report(metrics, source_name, output_file: Path):
@@ -60,5 +61,81 @@ def export_pdf_report(metrics, source_name, output_file: Path):
     figure.tight_layout(rect=(0.06, 0.06, 0.96, 0.85))
     figure.savefig(output_file, format="pdf")
     plt.close(figure)
+
+    return output_file
+
+
+def export_generic_pdf_report(profile, audit, charts, source_name, output_file):
+    """Create a PDF with the cleaning summary and auto-generated charts."""
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+
+    column_lines = [
+        f"- {column} ({column_type})"
+        for column, column_type in profile["column_types"].items()
+    ]
+
+    fill_lines = [
+        f"- {fill['column']}: {fill['count']} filled using "
+        f"{fill['method']} ({fill['value']})"
+        for fill in audit["nulls_filled"]
+    ]
+    if not fill_lines:
+        fill_lines = ["- None"]
+
+    remaining_lines = [
+        f"- {column}: {count}"
+        for column, count in audit["nulls_remaining"].items()
+    ]
+    if not remaining_lines:
+        remaining_lines = ["- None"]
+
+    trimmed = ", ".join(audit["columns_trimmed"]) or "None"
+
+    summary_lines = [
+        f"Rows before cleaning: {audit['rows_before']}",
+        f"Rows after cleaning: {audit['rows_after']}",
+        f"Duplicate rows dropped: {audit['duplicates_dropped']}",
+        f"Text columns trimmed: {trimmed}",
+        "",
+        "Columns:",
+        *column_lines,
+        "",
+        "Nulls filled:",
+        *fill_lines,
+        "",
+        "Nulls remaining:",
+        *remaining_lines,
+    ]
+
+    with PdfPages(output_file) as pdf:
+        figure = plt.figure(figsize=(8.27, 11.69))
+        figure.text(
+            0.5,
+            0.95,
+            "Data Cleaning Report",
+            ha="center",
+            fontsize=18,
+            fontweight="bold",
+        )
+        figure.text(
+            0.5,
+            0.91,
+            f"Source: {source_name}",
+            ha="center",
+            fontsize=11,
+        )
+        figure.text(
+            0.08,
+            0.85,
+            "\n".join(summary_lines),
+            va="top",
+            fontsize=11,
+        )
+        pdf.savefig(figure)
+        plt.close(figure)
+
+        for _, chart in charts:
+            pdf.savefig(chart)
+            plt.close(chart)
 
     return output_file

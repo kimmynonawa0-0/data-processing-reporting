@@ -4,11 +4,21 @@ from pathlib import Path
 
 from .chart_builder import build_charts
 from .cleaner import clean_data
+from .excel_report import export_generic_excel_report
+from .pdf_report import export_generic_pdf_report
 from .profiler import profile_data
 
 
+def export_cleaned_csv(cleaned, output_file: Path):
+    """Write the cleaned data to a CSV file."""
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    cleaned.to_csv(output_file, index=False)
+
+    return output_file
+
+
 def process_generic_data(data, source_name, output_directory: Path):
-    """Profile, clean, and chart any tabular dataset."""
+    """Profile, clean, chart, and export any tabular dataset."""
     if data.empty:
         return {
             "status": "failed",
@@ -30,6 +40,15 @@ def process_generic_data(data, source_name, output_directory: Path):
         profile["high_cardinality_columns"],
     )
 
+    source_stem = Path(source_name).stem
+    cleaned_csv = output_directory / f"{source_stem}_cleaned.csv"
+    cleaned_excel = output_directory / f"{source_stem}_cleaned.xlsx"
+    pdf_output = output_directory / f"{source_stem}_report.pdf"
+
+    export_cleaned_csv(cleaned, cleaned_csv)
+    export_generic_excel_report(cleaned, audit, cleaned_excel)
+    export_generic_pdf_report(profile, audit, charts, source_name, pdf_output)
+
     return {
         "status": "success",
         "issues": [],
@@ -37,7 +56,7 @@ def process_generic_data(data, source_name, output_directory: Path):
         "audit": audit,
         "cleaned": cleaned,
         "charts": charts,
-        "cleaned_csv": "",
-        "cleaned_excel": "",
-        "pdf_report": "",
+        "cleaned_csv": cleaned_csv,
+        "cleaned_excel": cleaned_excel,
+        "pdf_report": pdf_output,
     }
