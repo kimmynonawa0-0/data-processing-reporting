@@ -155,7 +155,7 @@ The generic workflow profiles each file to detect `numeric`, `datetime`, and `ca
 - trims outer spaces from text columns,
 - fills missing values by column type: the median for numeric columns, the most common value for categorical columns, and the nearest date for datetime columns.
 
-Every change is recorded in a cleaning audit, which appears in the command-line output, the Excel `Cleaning Audit` sheet, and the PDF report. Nulls that could not be filled are reported instead of silently dropped.
+Every change is recorded in a cleaning audit, which appears in the command-line output, the Excel `Cleaning Audit` sheet, and the PDF report. The PDF opens with a KPI band showing the rows before and after cleaning, the duplicates dropped, the null values filled, and the share of missing cells. Nulls that could not be filled are reported instead of silently dropped.
 
 Charts are chosen by column type: histograms and box plots for numeric columns, a monthly line for datetime columns, top-category bars for categorical columns with few unique values, a scatter plot of the first two numeric columns, and a correlation heatmap when at least two numeric columns exist. At most six charts are generated to keep reports compact.
 
@@ -171,7 +171,7 @@ python -m streamlit run app.py
 
 Upload one sales CSV in the `Sales Reports` tab to view its validation result, a KPI row with total revenue, total units, average order value, and unique products, the order date range, styled category and monthly revenue charts, a top products table, the revenue share per category, the cleaned data, and the report download buttons.
 
-Upload any CSV or Excel file in the `Data Cleaner` tab to view its cleaning summary, a data quality card with the row and column counts, missing cell share, duplicate rows, and column type mix, a cleaning audit, the generated charts in a two-column grid, and download buttons for the cleaned CSV, cleaned Excel, and PDF report. The cleaned data sits in an expandable section. Reports are generated locally in `outputs/`. The upload interface does not currently process folders. Every upload, valid or not, adds one row to the same processing log used by the command line.
+Upload any CSV or Excel file in the `Data Cleaner` tab to view its cleaning summary, a data quality card with the row and column counts, missing cell share, duplicate rows, and column type mix, a cleaning audit, the generated charts in a two-column grid, and download buttons for the cleaned CSV, cleaned Excel, and PDF report. The cleaned data sits in an expandable section. Reports are generated locally in `outputs/`. Uploads are cached per file, so rerunning the screen reuses the earlier results instead of regenerating the reports and the log entry. The upload interface does not currently process folders. Every upload, valid or not, adds one row to the same processing log used by the command line.
 
 ## Tests
 
