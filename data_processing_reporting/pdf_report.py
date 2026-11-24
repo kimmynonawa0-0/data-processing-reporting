@@ -82,6 +82,22 @@ def export_pdf_report(metrics, source_name, output_file: Path):
     return output_file
 
 
+def build_cleaning_kpis(profile, audit):
+    """Return the headline cleaning KPIs as label and value pairs."""
+    cell_count = profile["row_count"] * len(profile["columns"])
+    null_count = sum(profile["null_counts"].values())
+    null_share = f"{null_count / cell_count * 100:.1f}%" if cell_count else "0%"
+    filled_count = sum(fill["count"] for fill in audit["nulls_filled"])
+
+    return [
+        ("Rows before", audit["rows_before"]),
+        ("Rows after", audit["rows_after"]),
+        ("Duplicates dropped", audit["duplicates_dropped"]),
+        ("Nulls filled", filled_count),
+        ("Missing cells", null_share),
+    ]
+
+
 def export_generic_pdf_report(profile, audit, charts, source_name, output_file):
     """Create a PDF with the cleaning summary and auto-generated charts."""
     output_file.parent.mkdir(parents=True, exist_ok=True)
@@ -107,17 +123,10 @@ def export_generic_pdf_report(profile, audit, charts, source_name, output_file):
         remaining_lines = ["- None"]
 
     trimmed = ", ".join(audit["columns_trimmed"]) or "None"
-
-    cell_count = profile["row_count"] * len(profile["columns"])
-    null_count = sum(profile["null_counts"].values())
-    null_share = f"{null_count / cell_count * 100:.1f}%" if cell_count else "0%"
+    kpis = build_cleaning_kpis(profile, audit)
 
     summary_lines = [
-        f"Rows before cleaning: {audit['rows_before']}",
-        f"Rows after cleaning: {audit['rows_after']}",
-        f"Duplicate rows dropped: {audit['duplicates_dropped']}",
         f"Text columns trimmed: {trimmed}",
-        f"Missing cells before cleaning: {null_share}",
         "",
         "Columns:",
         *column_lines,
@@ -146,9 +155,38 @@ def export_generic_pdf_report(profile, audit, charts, source_name, output_file):
             ha="center",
             fontsize=11,
         )
+
+        divider = plt.Line2D(
+            [0.08, 0.92],
+            [0.80, 0.80],
+            transform=figure.transFigure,
+            color="#CCCCCC",
+        )
+        figure.add_artist(divider)
+
+        for index, (label, value) in enumerate(kpis):
+            kpi_x = 0.13 + index * 0.185
+            figure.text(
+                kpi_x,
+                0.86,
+                str(value),
+                ha="center",
+                fontsize=18,
+                fontweight="bold",
+                color="#1F4E79",
+            )
+            figure.text(
+                kpi_x,
+                0.825,
+                label,
+                ha="center",
+                fontsize=9,
+                color="#555555",
+            )
+
         figure.text(
             0.08,
-            0.85,
+            0.76,
             "\n".join(summary_lines),
             va="top",
             fontsize=11,
