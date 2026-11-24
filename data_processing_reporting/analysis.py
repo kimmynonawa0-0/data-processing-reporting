@@ -19,7 +19,7 @@ def prepare_sales_data(rows):
 
 
 def calculate_sales_metrics(sales):
-    """Return total revenue and revenue grouped by category and month."""
+    """Return total, average, and grouped revenue metrics for the sales."""
     revenue_by_category = (
         sales.groupby("category")["revenue"]
         .sum()
@@ -34,11 +34,27 @@ def calculate_sales_metrics(sales):
         .sort_index()
         .to_dict()
     )
+    revenue_by_product = (
+        sales.groupby("product")["revenue"]
+        .sum()
+        .round(2)
+        .sort_values(ascending=False, kind="stable")
+        .to_dict()
+    )
+
+    total_revenue = round(float(sales["revenue"].sum()), 2)
 
     return {
-        "total_revenue": round(float(sales["revenue"].sum()), 2),
+        "total_revenue": total_revenue,
         "total_units": int(sales["quantity"].sum()),
         "row_count": len(sales),
+        "unique_products": int(sales["product"].nunique()),
+        "average_order_value": round(total_revenue / len(sales), 2),
+        "date_range": [
+            sales["order_date"].min().date().isoformat(),
+            sales["order_date"].max().date().isoformat(),
+        ],
         "revenue_by_category": revenue_by_category,
         "revenue_by_month": revenue_by_month,
+        "revenue_by_product": revenue_by_product,
     }

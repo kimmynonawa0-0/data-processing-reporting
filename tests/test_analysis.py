@@ -125,3 +125,24 @@ def test_categories_are_ranked_by_revenue():
         "Technology",
         "Accessories",
     ]
+
+
+def test_calculate_sales_metrics_includes_summary_kpis():
+    sales = prepare_sales_data(SAMPLE_ROWS)
+    metrics = calculate_sales_metrics(sales)
+
+    assert metrics["unique_products"] == 4
+    assert metrics["average_order_value"] == pytest.approx(22.10)
+    assert metrics["date_range"] == ["2026-01-05", "2026-02-15"]
+
+
+def test_products_are_ranked_by_revenue():
+    sales = prepare_sales_data(SAMPLE_ROWS)
+    metrics = calculate_sales_metrics(sales)
+
+    assert list(metrics["revenue_by_product"]) == [
+        "USB Hub",
+        "Notebook",
+        "Desk Lamp",
+        "Pen Set",
+    ]
