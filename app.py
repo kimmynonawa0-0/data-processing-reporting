@@ -1,5 +1,6 @@
 """Local Streamlit interface for the sales and generic cleaning workflows."""
 
+import hashlib
 from csv import Error as CsvError
 from pathlib import Path
 
@@ -11,6 +12,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import streamlit as st
 
+from data_processing_reporting.chart_builder import build_charts
 from data_processing_reporting.csv_reader import read_csv_bytes
 from data_processing_reporting.generic_pipeline import process_generic_data
 from data_processing_reporting.pipeline import process_sales_data
@@ -20,6 +22,34 @@ from data_processing_reporting.tabular_reader import read_tabular_bytes
 
 OUTPUT_DIRECTORY = Path(__file__).resolve().parent / "outputs"
 PROCESSING_LOG = OUTPUT_DIRECTORY / "processing_log.csv"
+
+
+@st.cache_data(show_spinner=False)
+def run_sales_pipeline(columns, rows, source_name):
+    """Process one sales upload once and reuse the result on reruns."""
+    return process_sales_data(columns, rows, source_name, OUTPUT_DIRECTORY)
+
+
+@st.cache_data(show_spinner=False)
+def run_generic_pipeline(data, source_name):
+    """Clean one generic upload once and reuse the result on reruns."""
+    result = process_generic_data(data, source_name, OUTPUT_DIRECTORY)
+    result["charts"] = []
+    return result
+
+
+def log_upload_once(uploaded_file, row_count, log_values):
+    """Record an upload in the processing log only once per file."""
+    file_key = hashlib.sha1(uploaded_file.getvalue()).hexdigest()
+    logged_uploads = st.session_state.setdefault("logged_uploads", set())
+
+    if file_key in logged_uploads:
+        return
+
+    append_upload_result(
+        PROCESSING_LOG, uploaded_file.name, row_count, log_values
+    )
+    logged_uploads.add(file_key)
 
 
 def show_downloads(result):
@@ -288,24 +318,17 @@ def show_sales_upload():
         return
 
     st.caption(f"{uploaded_file.name}: {len(rows)} data rows")
-    result = process_sales_data(
-        columns,
-        rows,
-        uploaded_file.name,
-        OUTPUT_DIRECTORY,
-    )
+    result = run_sales_pipeline(columns, rows, uploaded_file.name)
 
     if result["issues"]:
         st.error("The file has validation issues. Reports were not generated.")
         for issue in result["issues"]:
             st.write(f"- {issue}")
-        append_upload_result(
-            PROCESSING_LOG, uploaded_file.name, len(rows), result
-        )
+        log_upload_once(uploaded_file, len(rows), result)
         return
 
     show_analysis(result)
-    append_upload_result(PROCESSING_LOG, uploaded_file.name, len(rows), result)
+    log_upload_once(uploaded_file, len(rows), result)
 
 
 def show_cleaner_upload():
@@ -327,15 +350,14 @@ def show_cleaner_upload():
         return
 
     st.caption(f"{uploaded_file.name}: {len(data)} data rows")
-    result = process_generic_data(data, uploaded_file.name, OUTPUT_DIRECTORY)
+    result = run_generic_pipeline(data, uploaded_file.name)
 
     if result["status"] == "failed":
         st.error("The file could not be processed.")
         for issue in result["issues"]:
             st.write(f"- {issue}")
-        append_upload_result(
-            PROCESSING_LOG,
-            uploaded_file.name,
+        log_upload_once(
+            uploaded_file,
             len(data),
             {
                 "status": "failed",
@@ -346,10 +368,14 @@ def show_cleaner_upload():
         )
         return
 
+    result["charts"] = build_charts(
+        result["cleaned"],
+        result["profile"]["column_types"],
+        result["profile"]["high_cardinality_columns"],
+    )
     show_cleaning_summary(result)
-    append_upload_result(
-        PROCESSING_LOG,
-        uploaded_file.name,
+    log_upload_once(
+        uploaded_file,
         result["profile"]["row_count"],
         {
             "status": "success",
