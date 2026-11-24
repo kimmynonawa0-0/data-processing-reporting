@@ -32,7 +32,29 @@ def create_summary_table(metrics):
             "label": "Total units",
             "value": metrics["total_units"],
         },
+        {
+            "section": "Overall",
+            "label": "Average order value",
+            "value": metrics["average_order_value"],
+        },
+        {
+            "section": "Overall",
+            "label": "Unique products",
+            "value": metrics["unique_products"],
+        },
+        {
+            "section": "Overall",
+            "label": "Date range",
+            "value": (
+                f"{metrics['date_range'][0]} to {metrics['date_range'][1]}"
+            ),
+        },
     ]
+
+    for product, revenue in metrics["revenue_by_product"].items():
+        summary_rows.append(
+            {"section": "Product", "label": product, "value": revenue}
+        )
 
     for category, revenue in metrics["revenue_by_category"].items():
         summary_rows.append(
@@ -67,8 +89,9 @@ def export_excel_report(sales, metrics, output_file: Path):
         format_number_column(cleaned_data, "revenue", "0.00")
         format_number_column(summary_sheet, "value", "0.00")
 
+        integer_labels = {"Total units", "Unique products"}
         for row in summary_sheet.iter_rows(min_row=2):
-            if row[1].value == "Total units":
+            if row[1].value in integer_labels:
                 row[2].number_format = "0"
 
     return output_file

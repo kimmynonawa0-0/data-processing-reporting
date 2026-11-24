@@ -11,7 +11,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 
 def export_pdf_report(metrics, source_name, output_file: Path):
-    """Create a PDF with the total and grouped revenue charts."""
+    """Create a PDF with the headline KPIs and grouped revenue charts."""
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
     categories = list(metrics["revenue_by_category"].keys())
@@ -24,7 +24,7 @@ def export_pdf_report(metrics, source_name, output_file: Path):
     figure.text(0.5, 0.93, f"Source: {source_name}", ha="center")
     figure.text(
         0.5,
-        0.89,
+        0.90,
         f"Total revenue: {metrics['total_revenue']:.2f}",
         ha="center",
         fontsize=14,
@@ -32,8 +32,19 @@ def export_pdf_report(metrics, source_name, output_file: Path):
     )
     figure.text(
         0.5,
-        0.86,
-        f"Rows: {metrics['row_count']}",
+        0.87,
+        (
+            f"Units: {metrics['total_units']} | Rows: {metrics['row_count']} | "
+            f"Average order value: {metrics['average_order_value']:.2f} | "
+            f"Products: {metrics['unique_products']}"
+        ),
+        ha="center",
+        fontsize=11,
+    )
+    figure.text(
+        0.5,
+        0.845,
+        f"Order dates: {metrics['date_range'][0]} to {metrics['date_range'][1]}",
         ha="center",
         fontsize=11,
     )
@@ -51,6 +62,12 @@ def export_pdf_report(metrics, source_name, output_file: Path):
     for chart in charts:
         chart.grid(axis="y", linestyle="--", alpha=0.4)
 
+    top_products = list(metrics["revenue_by_product"].items())[:5]
+    top_products_line = "Top products: " + ", ".join(
+        f"{product} ({revenue:.2f})" for product, revenue in top_products
+    )
+    figure.text(0.5, 0.055, top_products_line, ha="center", fontsize=9)
+
     figure.text(
         0.5,
         0.03,
@@ -58,7 +75,7 @@ def export_pdf_report(metrics, source_name, output_file: Path):
         ha="center",
         fontsize=9,
     )
-    figure.tight_layout(rect=(0.06, 0.06, 0.96, 0.85))
+    figure.tight_layout(rect=(0.06, 0.10, 0.96, 0.85))
     figure.savefig(output_file, format="pdf")
     plt.close(figure)
 
@@ -91,11 +108,16 @@ def export_generic_pdf_report(profile, audit, charts, source_name, output_file):
 
     trimmed = ", ".join(audit["columns_trimmed"]) or "None"
 
+    cell_count = profile["row_count"] * len(profile["columns"])
+    null_count = sum(profile["null_counts"].values())
+    null_share = f"{null_count / cell_count * 100:.1f}%" if cell_count else "0%"
+
     summary_lines = [
         f"Rows before cleaning: {audit['rows_before']}",
         f"Rows after cleaning: {audit['rows_after']}",
         f"Duplicate rows dropped: {audit['duplicates_dropped']}",
         f"Text columns trimmed: {trimmed}",
+        f"Missing cells before cleaning: {null_share}",
         "",
         "Columns:",
         *column_lines,
