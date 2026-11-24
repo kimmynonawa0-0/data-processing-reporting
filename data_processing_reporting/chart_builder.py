@@ -69,6 +69,51 @@ def build_category_bars(data, column, limit=MAX_CATEGORY_BARS):
     return figure, f"Top categories: {column}"
 
 
+def build_numeric_boxplot(data, column):
+    """Return a figure and title with a box plot of one numeric column."""
+    values = pd.to_numeric(data[column], errors="coerce").dropna()
+
+    if values.empty:
+        return None
+
+    figure, axis = plt.subplots(figsize=(8, 4))
+    axis.boxplot(
+        values,
+        orientation="horizontal",
+        patch_artist=True,
+        boxprops=dict(facecolor="#B6992D"),
+    )
+    axis.set_title(f"Spread of {column}")
+    axis.set_xlabel(column)
+    axis.set_yticks([])
+    axis.grid(axis="x", linestyle="--", alpha=0.4)
+    figure.tight_layout()
+
+    return figure, f"Spread of {column}"
+
+
+def build_numeric_scatter(data, first_column, second_column):
+    """Return a figure and title with a scatter of two numeric columns."""
+    pair = data[[first_column, second_column]].apply(
+        pd.to_numeric, errors="coerce"
+    ).dropna()
+
+    if pair.empty:
+        return None
+
+    figure, axis = plt.subplots(figsize=(8, 4))
+    axis.scatter(
+        pair[first_column], pair[second_column], color="#54A24B", alpha=0.7
+    )
+    axis.set_title(f"{second_column} vs {first_column}")
+    axis.set_xlabel(first_column)
+    axis.set_ylabel(second_column)
+    axis.grid(linestyle="--", alpha=0.4)
+    figure.tight_layout()
+
+    return figure, f"{second_column} vs {first_column}"
+
+
 def build_correlation_heatmap(data, numeric_columns):
     """Return a figure and title with a correlation heatmap."""
     numeric = data[numeric_columns].apply(pd.to_numeric, errors="coerce")
@@ -121,6 +166,18 @@ def build_charts(data, column_types, high_cardinality_columns=(), limit=MAX_CHAR
         else:
             continue
 
+        if chart:
+            charts.append(chart)
+
+    for column in numeric_columns:
+        if len(charts) >= limit:
+            break
+        chart = build_numeric_boxplot(data, column)
+        if chart:
+            charts.append(chart)
+
+    if len(numeric_columns) >= 2 and len(charts) < limit:
+        chart = build_numeric_scatter(data, numeric_columns[0], numeric_columns[1])
         if chart:
             charts.append(chart)
 

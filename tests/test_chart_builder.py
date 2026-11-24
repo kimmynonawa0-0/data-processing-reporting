@@ -10,7 +10,9 @@ from data_processing_reporting.chart_builder import (
     build_charts,
     build_correlation_heatmap,
     build_monthly_line,
+    build_numeric_boxplot,
     build_numeric_histogram,
+    build_numeric_scatter,
 )
 
 
@@ -33,6 +35,38 @@ def test_histogram_skips_an_empty_column():
     data = pd.DataFrame({"price": [None, None]})
 
     assert build_numeric_histogram(data, "price") is None
+
+
+def test_boxplot_shows_the_spread_of_a_numeric_column():
+    data = pd.DataFrame({"price": [1, 2, 3, 4, 5]})
+
+    chart = build_numeric_boxplot(data, "price")
+
+    assert chart[1] == "Spread of price"
+    assert len(chart[0].axes) == 1
+    close(chart)
+
+
+def test_boxplot_skips_an_empty_column():
+    data = pd.DataFrame({"price": [None, None]})
+
+    assert build_numeric_boxplot(data, "price") is None
+
+
+def test_scatter_pairs_two_numeric_columns():
+    data = pd.DataFrame({"price": [1, 2, 3], "quantity": [3, 2, 1]})
+
+    chart = build_numeric_scatter(data, "price", "quantity")
+
+    assert chart[1] == "quantity vs price"
+    assert len(chart[0].axes[0].collections) == 1
+    close(chart)
+
+
+def test_scatter_skips_an_empty_pair():
+    data = pd.DataFrame({"price": [None, None], "quantity": [1, 2]})
+
+    assert build_numeric_scatter(data, "price", "quantity") is None
 
 
 def test_monthly_line_counts_rows_per_month():
@@ -122,6 +156,25 @@ def test_build_charts_uses_each_column_type():
         "Distribution of price",
         "Distribution of quantity",
         "Top categories: product",
+        "Spread of price",
+        "Spread of quantity",
+    ]
+    for _, chart in charts:
+        plt.close(chart)
+
+
+def test_build_charts_adds_scatter_and_heatmap_for_numeric_pairs():
+    data = pd.DataFrame({"price": [1, 2, 3], "quantity": [3, 2, 1]})
+
+    charts = build_charts(data, {"price": "numeric", "quantity": "numeric"})
+    titles = [title for _, title in charts]
+
+    assert titles == [
+        "Distribution of price",
+        "Distribution of quantity",
+        "Spread of price",
+        "Spread of quantity",
+        "quantity vs price",
         "Correlation of numeric columns",
     ]
     for _, chart in charts:
@@ -146,7 +199,7 @@ def test_build_charts_skips_columns_without_values():
 
     charts = build_charts(data, {"order_date": "datetime", "price": "numeric"})
 
-    assert len(charts) == 1
+    assert len(charts) == 2
     for _, chart in charts:
         plt.close(chart)
 
