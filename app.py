@@ -57,6 +57,58 @@ def show_kpi_row(metrics):
     products_column.metric("Unique products", f"{metrics['unique_products']}")
 
 
+def build_sales_charts(metrics):
+    """Build styled bar and trend charts for the sales metrics."""
+    categories = list(metrics["revenue_by_category"].keys())
+    category_revenue = list(metrics["revenue_by_category"].values())
+    months = list(metrics["revenue_by_month"].keys())
+    monthly_revenue = list(metrics["revenue_by_month"].values())
+
+    category_figure, category_axis = plt.subplots(figsize=(8, 4))
+    category_bars = category_axis.bar(
+        categories, category_revenue, color="#4C78A8"
+    )
+    category_axis.set_title("Revenue by category")
+    category_axis.set_ylabel("Revenue")
+    category_axis.bar_label(category_bars, fmt="%.2f", padding=3)
+    category_axis.grid(axis="y", linestyle="--", alpha=0.4)
+    category_figure.tight_layout()
+
+    month_figure, month_axis = plt.subplots(figsize=(8, 4))
+    month_axis.plot(
+        months, monthly_revenue, marker="o", color="#F58518"
+    )
+    month_axis.set_title("Revenue by month")
+    month_axis.set_ylabel("Revenue")
+    month_axis.grid(linestyle="--", alpha=0.4)
+    month_figure.tight_layout()
+
+    return category_figure, month_figure
+
+
+def build_top_products_table(metrics):
+    """Return the products ranked by revenue as a display table."""
+    rows = [
+        {"Product": product, "Revenue": revenue}
+        for product, revenue in metrics["revenue_by_product"].items()
+    ]
+    return pd.DataFrame(rows)
+
+
+def build_category_share_table(metrics):
+    """Return each category's revenue and its share of the total."""
+    total_revenue = metrics["total_revenue"]
+    rows = [
+        {
+            "Category": category,
+            "Revenue": revenue,
+            "Share": f"{revenue / total_revenue * 100:.1f}%",
+        }
+        for category, revenue in metrics["revenue_by_category"].items()
+    ]
+    return pd.DataFrame(rows)
+
+
 def show_analysis(result):
     """Display the cleaned data and calculated revenue metrics."""
     metrics = result["metrics"]
@@ -66,15 +118,25 @@ def show_analysis(result):
         f"Orders from {metrics['date_range'][0]} to {metrics['date_range'][1]}"
     )
 
-    category_chart = pd.Series(
-        metrics["revenue_by_category"], name="Revenue"
-    )
-    monthly_chart = pd.Series(metrics["revenue_by_month"], name="Revenue")
+    chart_column, detail_column = st.columns([3, 2])
 
-    st.subheader("Revenue by category")
-    st.bar_chart(category_chart)
-    st.subheader("Revenue by month")
-    st.bar_chart(monthly_chart)
+    with chart_column:
+        st.subheader("Revenue by category and month")
+        category_figure, month_figure = build_sales_charts(metrics)
+        category_plot, month_plot = st.columns(2)
+        category_plot.pyplot(category_figure)
+        month_plot.pyplot(month_figure)
+        plt.close(category_figure)
+        plt.close(month_figure)
+
+    with detail_column:
+        st.subheader("Top products")
+        top_products = build_top_products_table(metrics)
+        st.dataframe(top_products, use_container_width=True, hide_index=True)
+
+        st.subheader("Category share")
+        category_share = build_category_share_table(metrics)
+        st.dataframe(category_share, use_container_width=True, hide_index=True)
 
     st.subheader("Cleaned data")
     st.dataframe(result["sales"], use_container_width=True)
