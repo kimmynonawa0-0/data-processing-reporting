@@ -175,8 +175,46 @@ def show_generic_downloads(result):
         )
 
 
+def show_quality_card(profile):
+    """Show a data quality overview card for the uploaded file."""
+    null_count = sum(profile["null_counts"].values())
+    cell_count = profile["row_count"] * len(profile["columns"])
+    null_share = f"{null_count / cell_count * 100:.1f}%" if cell_count else "0%"
+
+    type_mix = ", ".join(
+        f"{name} ({count})"
+        for name, count in pd.Series(profile["column_types"].values())
+        .value_counts()
+        .items()
+    )
+
+    st.subheader("Data quality")
+    row_column, column_column, null_column, duplicate_column = st.columns(4)
+    row_column.metric("Rows", profile["row_count"])
+    column_column.metric("Columns", f"{len(profile['columns'])}")
+    null_column.metric("Missing cells", null_share)
+    duplicate_column.metric("Duplicate rows", profile["duplicate_rows"])
+    st.caption(f"Column types: {type_mix}")
+
+
+def show_chart_grid(charts):
+    """Show the generated charts in a two-column responsive grid."""
+    st.subheader("Charts")
+    if not charts:
+        st.info("No charts could be generated for this file.")
+        return
+
+    for index in range(0, len(charts), 2):
+        left_column, right_column = st.columns(2)
+        left_column.pyplot(charts[index][0])
+        plt.close(charts[index][0])
+        if index + 1 < len(charts):
+            right_column.pyplot(charts[index + 1][0])
+            plt.close(charts[index + 1][0])
+
+
 def show_cleaning_summary(result):
-    """Display the cleaning audit, cleaned data, and charts."""
+    """Display the quality card, cleaning audit, charts, and cleaned data."""
     profile = result["profile"]
     audit = result["audit"]
 
@@ -186,21 +224,7 @@ def show_cleaning_summary(result):
     dropped_column.metric("Duplicates dropped", audit["duplicates_dropped"])
     after_column.metric("Rows after", audit["rows_after"])
 
-    if audit["columns_trimmed"]:
-        st.write(f"Text trimmed in: {', '.join(audit['columns_trimmed'])}")
-
-    if audit["nulls_filled"]:
-        st.subheader("Nulls filled")
-        fill_rows = [
-            {
-                "Column": fill["column"],
-                "Method": fill["method"],
-                "Value": fill["value"],
-                "Filled": fill["count"],
-            }
-            for fill in audit["nulls_filled"]
-        ]
-        st.dataframe(pd.DataFrame(fill_rows), use_container_width=True)
+    show_quality_card(profile)
 
     if audit["nulls_remaining"]:
         st.warning(
@@ -217,15 +241,32 @@ def show_cleaning_summary(result):
             + ", ".join(profile["high_cardinality_columns"])
         )
 
-    st.subheader("Cleaned data")
-    st.dataframe(result["cleaned"], use_container_width=True)
+    with st.expander("Cleaning audit", expanded=True):
+        if audit["columns_trimmed"]:
+            st.write(
+                f"Text trimmed in: {', '.join(audit['columns_trimmed'])}"
+            )
 
-    st.subheader("Charts")
-    if result["charts"]:
-        for _, chart in result["charts"]:
-            st.pyplot(chart)
-    else:
-        st.info("No charts could be generated for this file.")
+        if audit["nulls_filled"]:
+            st.write("Nulls filled")
+            fill_rows = [
+                {
+                    "Column": fill["column"],
+                    "Method": fill["method"],
+                    "Value": fill["value"],
+                    "Filled": fill["count"],
+                }
+                for fill in audit["nulls_filled"]
+            ]
+            st.dataframe(pd.DataFrame(fill_rows), use_container_width=True)
+
+        if not audit["columns_trimmed"] and not audit["nulls_filled"]:
+            st.info("No text trimming or null fills were needed.")
+
+    show_chart_grid(result["charts"])
+
+    with st.expander("Cleaned data"):
+        st.dataframe(result["cleaned"], use_container_width=True)
 
     show_generic_downloads(result)
 
