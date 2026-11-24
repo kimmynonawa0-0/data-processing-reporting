@@ -109,9 +109,9 @@ The required columns are `order_date`, `product`, `category`, `quantity`, and `u
 
 Revenue is calculated as `quantity * unit_price`. All rows are assumed to use the same currency because the current CSV format does not include a currency column. Analysis is skipped when validation finds an issue.
 
-The generated Excel workbook contains a `Cleaned Data` sheet with converted dates, numbers, revenue, and month values. Its `Summary` sheet contains the total revenue, total units, and the category and monthly revenue totals. Generated workbooks are stored in `outputs/` and are not committed to Git.
+The generated Excel workbook contains a `Cleaned Data` sheet with converted dates, numbers, revenue, and month values. Its `Summary` sheet contains the total revenue, total units, average order value, unique product count, date range, top products by revenue, and the category and monthly revenue totals. Generated workbooks are stored in `outputs/` and are not committed to Git.
 
-The generated one-page PDF contains total revenue, the row count, a category revenue chart, a monthly revenue chart, and the single-currency assumption. Generated PDFs are also stored in `outputs/` and kept out of Git.
+The generated one-page PDF contains the headline KPIs (total revenue, units, rows, average order value, unique products, and order date range), a category revenue chart, a monthly revenue chart, the top five products, and the single-currency assumption. Generated PDFs are also stored in `outputs/` and kept out of Git.
 
 Every attempted file adds one row to `outputs/processing_log.csv`. The log records the UTC processing time, source file, status, row count, validation or processing issues, and generated report paths. A failed file does not stop the remaining files in the folder. Folders are scanned recursively, including nested subfolders. After a run, the command line prints a short summary of how many files succeeded and failed.
 
@@ -157,7 +157,7 @@ The generic workflow profiles each file to detect `numeric`, `datetime`, and `ca
 
 Every change is recorded in a cleaning audit, which appears in the command-line output, the Excel `Cleaning Audit` sheet, and the PDF report. Nulls that could not be filled are reported instead of silently dropped.
 
-Charts are chosen by column type: histograms for numeric columns, a monthly line for datetime columns, top-category bars for categorical columns with few unique values, and a correlation heatmap when at least two numeric columns exist. At most six charts are generated to keep reports compact.
+Charts are chosen by column type: histograms and box plots for numeric columns, a monthly line for datetime columns, top-category bars for categorical columns with few unique values, a scatter plot of the first two numeric columns, and a correlation heatmap when at least two numeric columns exist. At most six charts are generated to keep reports compact.
 
 The workflow exports three files next to the source: `*_cleaned.csv`, `*_cleaned.xlsx`, and `*_report.pdf`.
 
@@ -169,7 +169,9 @@ Start the local Streamlit interface:
 python -m streamlit run app.py
 ```
 
-Upload one sales CSV in the `Sales Reports` tab to view its validation result, total revenue, total units, grouped charts, cleaned data, and report download buttons. Upload any CSV or Excel file in the `Data Cleaner` tab to view its cleaning audit, generated charts, cleaned data, and download buttons for the cleaned CSV, cleaned Excel, and PDF report. Reports are generated locally in `outputs/`. The upload interface does not currently process folders. Every upload, valid or not, adds one row to the same processing log used by the command line.
+Upload one sales CSV in the `Sales Reports` tab to view its validation result, a KPI row with total revenue, total units, average order value, and unique products, the order date range, styled category and monthly revenue charts, a top products table, the revenue share per category, the cleaned data, and the report download buttons.
+
+Upload any CSV or Excel file in the `Data Cleaner` tab to view its cleaning summary, a data quality card with the row and column counts, missing cell share, duplicate rows, and column type mix, a cleaning audit, the generated charts in a two-column grid, and download buttons for the cleaned CSV, cleaned Excel, and PDF report. The cleaned data sits in an expandable section. Reports are generated locally in `outputs/`. The upload interface does not currently process folders. Every upload, valid or not, adds one row to the same processing log used by the command line.
 
 ## Tests
 
