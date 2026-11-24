@@ -3,6 +3,11 @@
 from csv import Error as CsvError
 from pathlib import Path
 
+import matplotlib
+
+matplotlib.use("Agg")
+
+import matplotlib.pyplot as plt
 import pandas as pd
 import streamlit as st
 
@@ -40,12 +45,26 @@ def show_downloads(result):
         )
 
 
+def show_kpi_row(metrics):
+    """Show the headline sales numbers as a row of metrics."""
+    revenue_column, units_column, order_column, products_column = st.columns(4)
+
+    revenue_column.metric("Total revenue", f"{metrics['total_revenue']:.2f}")
+    units_column.metric("Total units", f"{metrics['total_units']}")
+    order_column.metric(
+        "Average order value", f"{metrics['average_order_value']:.2f}"
+    )
+    products_column.metric("Unique products", f"{metrics['unique_products']}")
+
+
 def show_analysis(result):
     """Display the cleaned data and calculated revenue metrics."""
     metrics = result["metrics"]
     st.success("Validation passed.")
-    st.metric("Total revenue", f"{metrics['total_revenue']:.2f}")
-    st.metric("Total units", f"{metrics['total_units']}")
+    show_kpi_row(metrics)
+    st.caption(
+        f"Orders from {metrics['date_range'][0]} to {metrics['date_range'][1]}"
+    )
 
     category_chart = pd.Series(
         metrics["revenue_by_category"], name="Revenue"
