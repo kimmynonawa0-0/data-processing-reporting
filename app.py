@@ -313,6 +313,16 @@ def show_sales_upload():
         columns, rows = read_csv_bytes(uploaded_file.getvalue())
     except (UnicodeDecodeError, CsvError) as error:
         st.error(f"The CSV could not be read: {error}")
+        log_upload_once(
+            uploaded_file,
+            0,
+            {
+                "status": "failed",
+                "issues": [f"The CSV could not be read: {error}"],
+                "excel_report": "",
+                "pdf_report": "",
+            },
+        )
         return
 
     st.caption(f"{uploaded_file.name}: {len(rows)} data rows")
@@ -345,6 +355,16 @@ def show_cleaner_upload():
         data = read_tabular_bytes(uploaded_file.getvalue(), uploaded_file.name)
     except ValueError as error:
         st.error(f"The file could not be read: {error}")
+        log_upload_once(
+            uploaded_file,
+            0,
+            {
+                "status": "failed",
+                "issues": [f"The file could not be read: {error}"],
+                "excel_report": "",
+                "pdf_report": "",
+            },
+        )
         return
 
     st.caption(f"{uploaded_file.name}: {len(data)} data rows")
