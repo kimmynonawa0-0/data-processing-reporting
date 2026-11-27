@@ -52,27 +52,33 @@ def log_upload_once(uploaded_file, row_count, log_values):
     logged_uploads.add(file_key)
 
 
+def show_download_button(column, label, report_path, mime):
+    """Show one download button for a generated report."""
+    with column:
+        st.download_button(
+            label,
+            data=report_path.read_bytes(),
+            file_name=report_path.name,
+            mime=mime,
+        )
+
+
 def show_downloads(result):
     """Show buttons for the generated Excel and PDF reports."""
-    excel_report = result["excel_report"]
-    pdf_report = result["pdf_report"]
     excel_column, pdf_column = st.columns(2)
 
-    with excel_column:
-        st.download_button(
-            "Download Excel report",
-            data=excel_report.read_bytes(),
-            file_name=excel_report.name,
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        )
-
-    with pdf_column:
-        st.download_button(
-            "Download PDF report",
-            data=pdf_report.read_bytes(),
-            file_name=pdf_report.name,
-            mime="application/pdf",
-        )
+    show_download_button(
+        excel_column,
+        "Download Excel report",
+        result["excel_report"],
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    show_download_button(
+        pdf_column,
+        "Download PDF report",
+        result["pdf_report"],
+        "application/pdf",
+    )
 
 
 def show_kpi_row(metrics):
@@ -175,34 +181,26 @@ def show_analysis(result):
 
 def show_generic_downloads(result):
     """Show buttons for the cleaned CSV, Excel, and PDF report."""
-    cleaned_csv = result["cleaned_csv"]
-    cleaned_excel = result["cleaned_excel"]
-    pdf_report = result["pdf_report"]
     csv_column, excel_column, pdf_column = st.columns(3)
 
-    with csv_column:
-        st.download_button(
-            "Download cleaned CSV",
-            data=cleaned_csv.read_bytes(),
-            file_name=cleaned_csv.name,
-            mime="text/csv",
-        )
-
-    with excel_column:
-        st.download_button(
-            "Download cleaned Excel",
-            data=cleaned_excel.read_bytes(),
-            file_name=cleaned_excel.name,
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        )
-
-    with pdf_column:
-        st.download_button(
-            "Download PDF report",
-            data=pdf_report.read_bytes(),
-            file_name=pdf_report.name,
-            mime="application/pdf",
-        )
+    show_download_button(
+        csv_column,
+        "Download cleaned CSV",
+        result["cleaned_csv"],
+        "text/csv",
+    )
+    show_download_button(
+        excel_column,
+        "Download cleaned Excel",
+        result["cleaned_excel"],
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    show_download_button(
+        pdf_column,
+        "Download PDF report",
+        result["pdf_report"],
+        "application/pdf",
+    )
 
 
 def show_quality_card(profile):
