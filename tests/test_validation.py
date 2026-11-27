@@ -1,5 +1,7 @@
 """Tests for sales CSV validation."""
 
+import pytest
+
 from data_processing_reporting.validation import REQUIRED_COLUMNS, find_data_issues
 
 
@@ -29,17 +31,24 @@ def test_missing_column_and_blank_value_are_reported():
     assert "Row 2: blank value in 'product'" in issues
 
 
-def test_invalid_date_quantity_and_price_are_reported():
+@pytest.mark.parametrize(
+    ("field", "value", "expected_issue"),
+    [
+        ("order_date", "01/05/2026", "Row 2: invalid order_date '01/05/2026'"),
+        ("order_date", "2026-13-01", "Row 2: invalid order_date '2026-13-01'"),
+        ("quantity", "1.5", "Row 2: quantity must be a positive whole number"),
+        ("quantity", "0", "Row 2: quantity must be a positive whole number"),
+        ("unit_price", "-4.50", "Row 2: unit_price must be a nonnegative number"),
+        ("unit_price", "abc", "Row 2: unit_price must be a nonnegative number"),
+    ],
+)
+def test_invalid_values_are_reported(field, value, expected_issue):
     row = VALID_ROW.copy()
-    row["order_date"] = "01/05/2026"
-    row["quantity"] = "1.5"
-    row["unit_price"] = "-4.50"
+    row[field] = value
 
     issues = find_data_issues(REQUIRED_COLUMNS, [row])
 
-    assert "Row 2: invalid order_date '01/05/2026'" in issues
-    assert "Row 2: quantity must be a positive whole number" in issues
-    assert "Row 2: unit_price must be a nonnegative number" in issues
+    assert expected_issue in issues
 
 
 def test_empty_data_is_reported():
