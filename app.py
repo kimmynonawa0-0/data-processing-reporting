@@ -168,14 +168,14 @@ def show_analysis(result):
     with detail_column:
         st.subheader("Top products")
         top_products = build_top_products_table(metrics)
-        st.dataframe(top_products, use_container_width=True, hide_index=True)
+        st.dataframe(top_products, width="stretch", hide_index=True)
 
         st.subheader("Category share")
         category_share = build_category_share_table(metrics)
-        st.dataframe(category_share, use_container_width=True, hide_index=True)
+        st.dataframe(category_share, width="stretch", hide_index=True)
 
     st.subheader("Cleaned data")
-    st.dataframe(result["sales"], use_container_width=True)
+    st.dataframe(result["sales"], width="stretch")
     show_downloads(result)
 
 
@@ -286,7 +286,7 @@ def show_cleaning_summary(result):
                 }
                 for fill in audit["nulls_filled"]
             ]
-            st.dataframe(pd.DataFrame(fill_rows), use_container_width=True)
+            st.dataframe(pd.DataFrame(fill_rows), width="stretch")
 
         if not audit["columns_trimmed"] and not audit["nulls_filled"]:
             st.info("No text trimming or null fills were needed.")
@@ -294,7 +294,7 @@ def show_cleaning_summary(result):
     show_chart_grid(result["charts"])
 
     with st.expander("Cleaned data"):
-        st.dataframe(result["cleaned"], use_container_width=True)
+        st.dataframe(result["cleaned"], width="stretch")
 
     show_generic_downloads(result)
 
